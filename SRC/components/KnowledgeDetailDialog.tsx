@@ -16,6 +16,7 @@ interface KnowledgeDetailDialogProps {
   onOpenChange: (open: boolean) => void
   onMasteryChange: (pointId: number, mastery: MasteryLevel) => void
   onPointUpdate?: (point: KnowledgePoint) => void
+  isOwner?: boolean
 }
 
 export function KnowledgeDetailDialog({ 
@@ -23,7 +24,8 @@ export function KnowledgeDetailDialog({
   open, 
   onOpenChange, 
   onMasteryChange,
-  onPointUpdate 
+  onPointUpdate,
+  isOwner 
 }: KnowledgeDetailDialogProps) {
   const [notes, setNotes] = useState('')
   const [videoLink, setVideoLink] = useState('')
@@ -124,13 +126,19 @@ export function KnowledgeDetailDialog({
               <VideoCamera weight="bold" />
               Lien vidéo
             </Label>
-            <Input
-              id="video-link"
-              placeholder="https://youtube.com/watch?v=..."
-              value={videoLink}
-              onChange={(e) => handleVideoLinkChange(e.target.value)}
-              className="mt-3"
-            />
+            {isOwner ? (
+              <Input
+                id="video-link"
+                placeholder="https://youtube.com/watch?v=..."
+                value={videoLink}
+                onChange={(e) => handleVideoLinkChange(e.target.value)}
+                className="mt-3"
+              />
+            ) : (
+              videoLink ? null : (
+                <p className="text-sm text-muted-foreground mt-3">Aucun lien vidéo</p>
+              )
+            )}
             {videoLink && (
               <a 
                 href={videoLink} 

@@ -486,6 +486,7 @@ function App() {
         onOpenChange={setDialogOpen}
         onMasteryChange={handleMasteryChange}
         onPointUpdate={handlePointUpdate}
+        isOwner={userInfo?.isOwner}
       />
       <ImportDialog
         open={importDialogOpen}
