@@ -1,6 +1,9 @@
 {
   "name": "mastermind-revision",
-  "private": true,
+  "private": true,  cd "c:\Users\adlafon\Downloads\revisions-main\revisions-main"
+  git init
+  git add .
+  git commit -m "Préparer le projet pour Azure Static Web Apps"
   "version": "1.0.0",
   "type": "module",
   "scripts": {

@@ -125,9 +125,7 @@ export function AdminPanel({ points, onSave, onExit }: AdminPanelProps) {
               <div className="space-y-5">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-3 flex-1">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary font-bold text-sm">
-                      #{point.id}
-                    </div>
+
                     <div className="flex-1 space-y-1">
                       <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Titre</label>
                       <Input

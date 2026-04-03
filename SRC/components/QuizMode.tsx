@@ -178,7 +178,6 @@ export function QuizMode({ points, onExit, onMasteryChange }: QuizModeProps) {
             <CardHeader className="bg-gradient-to-r from-primary to-accent text-white">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
-                  <div className="text-sm font-medium opacity-90 mb-2">Point #{currentPoint.id}</div>
                   <CardTitle className="text-2xl font-bold leading-tight">
                     {currentPoint.title}
                   </CardTitle>

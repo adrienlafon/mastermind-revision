@@ -19,8 +19,7 @@ export function KnowledgeCard({ point, onClick }: KnowledgeCardProps) {
         onClick={onClick}
       >
         <CardContent className="p-4 flex flex-col gap-3 h-full">
-          <div className="flex items-start justify-between gap-2">
-            <span className="text-sm font-semibold text-muted-foreground">#{point.id}</span>
+          <div className="flex items-start justify-end gap-2">
             <MasteryBadge mastery={point.mastery} />
           </div>
           <h3 className="font-semibold text-base leading-tight line-clamp-2">

@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { INITIAL_KNOWLEDGE_POINTS, KnowledgePoint, MasteryLevel } from '@/lib/data'
-import { storage, getUser, type UserInfo } from '@/lib/storage'
+import { storage, getCurrentUser, logoutUser, type UserInfo } from '@/lib/storage'
+import { LoginScreen } from '@/components/LoginScreen'
 import { KnowledgeCard } from '@/components/KnowledgeCard'
 import { KnowledgeDetailDialog } from '@/components/KnowledgeDetailDialog'
 import { QuizMode } from '@/components/QuizMode'
@@ -10,7 +11,7 @@ import { AdminPanel } from '@/components/AdminPanel'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Brain, List, Upload, Table, GearSix } from '@phosphor-icons/react'
+import { Brain, List, Upload, Table, GearSix, SignOut } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { toast } from 'sonner'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -28,60 +29,78 @@ function App() {
   const [isLoading, setIsLoading] = useState(true)
   const [adminMode, setAdminMode] = useState(false)
 
-  useEffect(() => {
-    const initializeUser = () => {
-      try {
-        const user = getUser()
-        setUserInfo(user)
+  const initializeUserData = (user: UserInfo) => {
+    try {
+      setUserInfo(user)
+      
+      const userProgressKey = `user-progress-${user.id}`
+      const hasSeenWelcome = storage.get<boolean>(`welcome-${user.id}`)
+      
+      const masterData = storage.get<KnowledgePoint[]>('knowledge-points')
+      
+      if (masterData && Array.isArray(masterData) && masterData.length > 0) {
+        const userProgress = storage.get<Record<number, { mastery: MasteryLevel, notes?: string }>>(userProgressKey)
         
-        const userProgressKey = `user-progress-${user.id}`
-        const hasSeenWelcome = storage.get<boolean>(`welcome-${user.id}`)
-        
-        const masterData = storage.get<KnowledgePoint[]>('knowledge-points')
-        
-        if (masterData && Array.isArray(masterData) && masterData.length > 0) {
-          const userProgress = storage.get<Record<number, { mastery: MasteryLevel, notes?: string }>>(userProgressKey)
-          
-          if (userProgress) {
-            const pointsWithProgress = masterData.map(point => ({
-              ...point,
-              mastery: userProgress[point.id]?.mastery || (user.isOwner ? point.mastery : 'weak' as MasteryLevel),
-              notes: userProgress[point.id]?.notes || (user.isOwner ? point.notes : '')
-            }))
-            setPoints(pointsWithProgress)
-          } else if (!user.isOwner) {
-            const initialPoints = masterData.map(point => ({
-              ...point,
-              mastery: 'weak' as MasteryLevel,
-              notes: ''
-            }))
-            setPoints(initialPoints)
-          } else {
-            setPoints(masterData)
-          }
+        if (userProgress) {
+          const pointsWithProgress = masterData.map(point => ({
+            ...point,
+            mastery: userProgress[point.id]?.mastery || (user.isOwner ? point.mastery : 'weak' as MasteryLevel),
+            notes: userProgress[point.id]?.notes || (user.isOwner ? point.notes : '')
+          }))
+          setPoints(pointsWithProgress)
+        } else if (!user.isOwner) {
+          const initialPoints = masterData.map(point => ({
+            ...point,
+            mastery: 'weak' as MasteryLevel,
+            notes: ''
+          }))
+          setPoints(initialPoints)
         } else {
-          setPoints(INITIAL_KNOWLEDGE_POINTS)
+          setPoints(masterData)
         }
-        
-        if (!hasSeenWelcome) {
-          setTimeout(() => {
-            toast.success(`Bienvenue ${user.login} !`, {
-              description: 'Votre progression est enregistrée automatiquement.',
-              duration: 5000
-            })
-            storage.set(`welcome-${user.id}`, true)
-          }, 500)
-        }
-      } catch (error) {
-        console.error('Error initializing user:', error)
+      } else {
         setPoints(INITIAL_KNOWLEDGE_POINTS)
-      } finally {
-        setIsLoading(false)
       }
+      
+      if (!hasSeenWelcome) {
+        setTimeout(() => {
+          toast.success(`Bienvenue ${user.login} !`, {
+            description: 'Votre progression est enregistrée automatiquement.',
+            duration: 5000
+          })
+          storage.set(`welcome-${user.id}`, true)
+        }, 500)
+      }
+    } catch (error) {
+      console.error('Error initializing user:', error)
+      setPoints(INITIAL_KNOWLEDGE_POINTS)
+    } finally {
+      setIsLoading(false)
     }
-    
-    initializeUser()
+  }
+
+  useEffect(() => {
+    const existingUser = getCurrentUser()
+    if (existingUser) {
+      initializeUserData(existingUser)
+    } else {
+      setIsLoading(false)
+    }
   }, [])
+
+  const handleLogin = (user: UserInfo) => {
+    setIsLoading(true)
+    initializeUserData(user)
+  }
+
+  const handleLogout = () => {
+    logoutUser()
+    setUserInfo(null)
+    setPoints(INITIAL_KNOWLEDGE_POINTS)
+    setQuizMode(false)
+    setAdminMode(false)
+    toast.success('Déconnexion réussie')
+  }
 
   useEffect(() => {
     if (userInfo && !isLoading && Array.isArray(points) && points.length > 0) {
@@ -166,6 +185,15 @@ function App() {
     )
   }
 
+  if (!userInfo) {
+    return (
+      <>
+        <LoginScreen onLogin={handleLogin} />
+        <Toaster />
+      </>
+    )
+  }
+
   if (adminMode) {
     return (
       <>
@@ -200,7 +228,7 @@ function App() {
             <div className="flex-1">
               <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 tracking-tight">MasterMind</h1>
               <p className="text-white/90 text-sm md:text-base">
-                Maîtrisez les 70 points essentiels de React - Votre progression personnelle
+                Maîtrisez les 70 techniques essentielles de JJB - Votre progression personnelle
               </p>
             </div>
             <div className="flex gap-2 flex-wrap items-center">
@@ -258,6 +286,11 @@ function App() {
                         </DropdownMenuItem>
                       </>
                     )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
+                      <SignOut className="mr-2 h-4 w-4" weight="bold" />
+                      Se déconnecter
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}

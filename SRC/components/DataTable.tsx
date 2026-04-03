@@ -286,7 +286,6 @@ export function DataTable({ points, onPointClick, onPointUpdate }: DataTableProp
                 return isEditing ? (
                   <TableRow key={point.id} className="bg-accent/10">
                     <TableCell className="font-medium text-muted-foreground">
-                      #{point.id}
                     </TableCell>
                     <TableCell>
                       <Input
@@ -361,7 +360,6 @@ export function DataTable({ points, onPointClick, onPointUpdate }: DataTableProp
                     className="cursor-pointer hover:bg-muted/50 transition-colors"
                   >
                     <TableCell className="font-medium text-muted-foreground">
-                      #{point.id}
                     </TableCell>
                     <TableCell className="font-medium" onClick={() => onPointClick(point)}>
                       {point.title}

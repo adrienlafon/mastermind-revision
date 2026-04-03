@@ -67,7 +67,6 @@ export function KnowledgeDetailDialog({
         <DialogHeader>
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
-              <div className="text-sm font-medium text-muted-foreground mb-2">Point #{point.id}</div>
               <DialogTitle className="text-2xl font-bold leading-tight pr-8">
                 {point.title}
               </DialogTitle>
