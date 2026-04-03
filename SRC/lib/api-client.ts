@@ -21,7 +21,7 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<{ o
   const token = getToken()
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(token ? { 'Authorization': `Bearer ${token}`, 'x-auth-token': token } : {}),
     ...(options.headers as Record<string, string> ?? {})
   }
 

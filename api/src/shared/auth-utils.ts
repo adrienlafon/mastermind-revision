@@ -23,9 +23,18 @@ export function verifyToken(token: string): JwtPayload | null {
 }
 
 export function getAuthFromRequest(req: HttpRequest): JwtPayload | null {
+  // Try standard Authorization header first
   const authHeader = req.headers.get('authorization')
-  if (!authHeader?.startsWith('Bearer ')) return null
-  return verifyToken(authHeader.slice(7))
+  if (authHeader?.startsWith('Bearer ')) {
+    const result = verifyToken(authHeader.slice(7))
+    if (result) return result
+  }
+  // Fallback: custom header (Azure SWA may strip Authorization)
+  const customToken = req.headers.get('x-auth-token')
+  if (customToken) {
+    return verifyToken(customToken)
+  }
+  return null
 }
 
 export async function hashPassword(password: string, salt: string): Promise<string> {
