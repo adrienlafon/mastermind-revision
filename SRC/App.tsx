@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, createContext, useContext } from 'react'
-import { INITIAL_KNOWLEDGE_POINTS, KnowledgePoint, MasteryLevel } from '@/lib/data'
+import { INITIAL_KNOWLEDGE_POINTS, KnowledgePoint, MasteryLevel, ThemeType, THEME_CONFIG } from '@/lib/data'
 import { storage, getCurrentUser, logoutUser, type UserInfo } from '@/lib/storage'
 import { apiGetPoints, apiGetProgress, apiUpdateProgress, apiUpdatePoints, apiBulkProgress } from '@/lib/api-client'
 import { LoginScreen } from '@/components/LoginScreen'
@@ -12,7 +12,7 @@ import { StatsPanel } from '@/components/StatsPanel'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { List, Upload, Table, GearSix, SignOut, Moon, Sun, ChartBar } from '@phosphor-icons/react'
+import { List, Upload, Table, GearSix, SignOut, Moon, Sun, ChartBar, MagnifyingGlass } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { toast } from 'sonner'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -30,6 +30,8 @@ function App() {
   const [selectedPoint, setSelectedPoint] = useState<KnowledgePoint | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [filterLevel, setFilterLevel] = useState<MasteryLevel | 'all' | 'due'>('all')
+  const [filterTheme, setFilterTheme] = useState<ThemeType | 'all'>('all')
+  const [searchQuery, setSearchQuery] = useState('')
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
   const [isLoading, setIsLoading] = useState(true)
@@ -185,10 +187,31 @@ function App() {
 
   const filteredPoints = useMemo(() => {
     if (!points || !Array.isArray(points)) return []
-    if (filterLevel === 'all') return points
-    if (filterLevel === 'due') return points.filter(p => isDueForReview(srData[p.id]))
-    return points.filter(p => p.mastery === filterLevel)
-  }, [points, filterLevel, srData])
+    let result = points
+    
+    // Filter by mastery level
+    if (filterLevel === 'due') {
+      result = result.filter(p => isDueForReview(srData[p.id]))
+    } else if (filterLevel !== 'all') {
+      result = result.filter(p => p.mastery === filterLevel)
+    }
+    
+    // Filter by theme
+    if (filterTheme !== 'all') {
+      result = result.filter(p => p.theme === filterTheme)
+    }
+    
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim()
+      result = result.filter(p => 
+        p.title.toLowerCase().includes(q) || 
+        p.description.toLowerCase().includes(q)
+      )
+    }
+    
+    return result
+  }, [points, filterLevel, filterTheme, searchQuery, srData])
 
   const handleCardClick = (point: KnowledgePoint) => {
     setSelectedPoint(point)
@@ -412,12 +435,59 @@ function App() {
           </div>
         </div>
 
+        {/* Search bar */}
+        <div className="relative">
+          <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} weight="bold" />
+          <input
+            type="text"
+            placeholder="Rechercher une technique..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 rounded-lg border-2 bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        {/* Theme filter pills */}
+        <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 md:mx-0 md:px-0">
+          <button
+            onClick={() => setFilterTheme('all')}
+            className={`shrink-0 px-3 py-1.5 rounded-full text-xs md:text-sm font-medium border-2 transition-colors ${
+              filterTheme === 'all' 
+                ? 'bg-primary text-primary-foreground border-primary' 
+                : 'bg-card border-border hover:border-primary/50'
+            }`}
+          >
+            Tous
+          </button>
+          {(Object.entries(THEME_CONFIG) as [ThemeType, typeof THEME_CONFIG[ThemeType]][]).map(([key, config]) => (
+            <button
+              key={key}
+              onClick={() => setFilterTheme(filterTheme === key ? 'all' : key)}
+              className={`shrink-0 px-3 py-1.5 rounded-full text-xs md:text-sm font-medium border-2 transition-colors ${
+                filterTheme === key
+                  ? 'text-white border-transparent'
+                  : 'bg-card border-border hover:border-primary/50'
+              }`}
+              style={filterTheme === key ? { backgroundColor: config.color } : undefined}
+            >
+              {config.icon} {config.label}
+            </button>
+          ))}
+        </div>
+
         <div className="flex items-center justify-between gap-2 md:gap-4 flex-wrap">
           <div className="flex items-center gap-2 md:gap-3">
             <div className="flex items-center gap-2">
-              <List weight="bold" className="text-muted-foreground hidden md:block" />
               <h2 className="text-base md:text-xl font-semibold">
-                {filterLevel === 'all' ? 'Tous les points' : `Points : ${filteredPoints.length}`}
+                {filteredPoints.length} technique{filteredPoints.length > 1 ? 's' : ''}
               </h2>
             </div>
             
