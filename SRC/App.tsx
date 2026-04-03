@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, createContext, useContext } from 'react'
 import { INITIAL_KNOWLEDGE_POINTS, KnowledgePoint, MasteryLevel } from '@/lib/data'
 import { storage, getCurrentUser, logoutUser, type UserInfo } from '@/lib/storage'
+import { apiGetPoints, apiGetProgress, apiUpdateProgress, apiUpdatePoints, apiBulkProgress } from '@/lib/api-client'
 import { LoginScreen } from '@/components/LoginScreen'
 import { KnowledgeCard } from '@/components/KnowledgeCard'
 import { KnowledgeDetailDialog } from '@/components/KnowledgeDetailDialog'
@@ -47,46 +48,65 @@ function App() {
 
   const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light')
 
-  const initializeUserData = (user: UserInfo) => {
+  const initializeUserData = async (user: UserInfo) => {
     try {
       setUserInfo(user)
       
-      const userProgressKey = `user-progress-${user.id}`
       const hasSeenWelcome = storage.get<boolean>(`welcome-${user.id}`)
-      
-      const masterData = storage.get<KnowledgePoint[]>('knowledge-points')
-      
-      if (masterData && Array.isArray(masterData) && masterData.length > 0) {
-        const userProgress = storage.get<Record<number, { mastery: MasteryLevel, notes?: string }>>(userProgressKey)
-        
-        if (userProgress) {
-          const pointsWithProgress = masterData.map(point => ({
-            ...point,
-            mastery: userProgress[point.id]?.mastery || (user.isOwner ? point.mastery : 'weak' as MasteryLevel),
-            notes: userProgress[point.id]?.notes || (user.isOwner ? point.notes : '')
-          }))
-          setPoints(pointsWithProgress)
-        } else if (!user.isOwner) {
-          const initialPoints = masterData.map(point => ({
-            ...point,
-            mastery: 'weak' as MasteryLevel,
-            notes: ''
-          }))
-          setPoints(initialPoints)
-        } else {
-          setPoints(masterData)
-        }
-      } else {
-        setPoints(INITIAL_KNOWLEDGE_POINTS)
+
+      // Load points from API
+      let loadedPoints: KnowledgePoint[] = INITIAL_KNOWLEDGE_POINTS
+      const pointsResult = await apiGetPoints()
+      if (pointsResult.ok && pointsResult.data?.points?.length > 0) {
+        loadedPoints = pointsResult.data.points.map((p: any) => ({
+          id: p.pointId ?? p.id,
+          title: p.title,
+          description: p.description,
+          mastery: p.mastery || 'weak',
+          notes: p.notes || '',
+          videoLink: p.videoLink || ''
+        }))
       }
 
-      // Load spaced repetition data
-      setSrData(getSpacedRepetitionData(user.id))
+      // Load user progress from API
+      const progressResult = await apiGetProgress()
+      if (progressResult.ok && progressResult.data?.progress?.length > 0) {
+        const progressMap = new Map(
+          progressResult.data.progress.map((p: any) => [p.pointId, p])
+        )
+        loadedPoints = loadedPoints.map(point => {
+          const prog = progressMap.get(point.id)
+          if (prog) {
+            return {
+              ...point,
+              mastery: (prog.mastery as MasteryLevel) || point.mastery,
+              notes: prog.notes || point.notes
+            }
+          }
+          return user.isOwner ? point : { ...point, mastery: 'weak' as MasteryLevel, notes: '' }
+        })
+
+        // Load SR data from progress entries
+        const srFromApi: Record<number, SpacedRepetitionEntry> = {}
+        progressResult.data.progress.forEach((p: any) => {
+          if (p.srData) srFromApi[p.pointId] = p.srData
+        })
+        if (Object.keys(srFromApi).length > 0) {
+          setSrData(srFromApi)
+        } else {
+          setSrData(getSpacedRepetitionData(user.id))
+        }
+      } else {
+        // Fallback to local SR data
+        setSrData(getSpacedRepetitionData(user.id))
+      }
+
+      setPoints(loadedPoints)
       
       if (!hasSeenWelcome) {
         setTimeout(() => {
           toast.success(`Bienvenue ${user.login} !`, {
-            description: 'Votre progression est enregistrée automatiquement.',
+            description: 'Votre progression est synchronisée avec le serveur.',
             duration: 5000
           })
           storage.set(`welcome-${user.id}`, true)
@@ -101,17 +121,20 @@ function App() {
   }
 
   useEffect(() => {
-    const existingUser = getCurrentUser()
-    if (existingUser) {
-      initializeUserData(existingUser)
-    } else {
-      setIsLoading(false)
+    const checkUser = async () => {
+      const existingUser = await getCurrentUser()
+      if (existingUser) {
+        await initializeUserData(existingUser)
+      } else {
+        setIsLoading(false)
+      }
     }
+    checkUser()
   }, [])
 
-  const handleLogin = (user: UserInfo) => {
+  const handleLogin = async (user: UserInfo) => {
     setIsLoading(true)
-    initializeUserData(user)
+    await initializeUserData(user)
   }
 
   const handleLogout = () => {
@@ -123,24 +146,24 @@ function App() {
     toast.success('Déconnexion réussie')
   }
 
+  // Debounced save to API
+  const saveTimeoutRef = { current: null as ReturnType<typeof setTimeout> | null }
+  
   useEffect(() => {
     if (userInfo && !isLoading && Array.isArray(points) && points.length > 0) {
-      if (userInfo.isOwner) {
-        storage.set('knowledge-points', points)
-      }
-      
-      const userProgressKey = `user-progress-${userInfo.id}`
-      const userProgress: Record<number, { mastery: MasteryLevel, notes?: string }> = {}
-      
-      points.forEach(point => {
-        userProgress[point.id] = {
+      // Save to API with debounce
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current)
+      saveTimeoutRef.current = setTimeout(() => {
+        const entries = points.map(point => ({
+          pointId: point.id,
           mastery: point.mastery,
-          notes: point.notes
-        }
-      })
-      
-      storage.set(userProgressKey, userProgress)
+          notes: point.notes,
+          srData: srData[point.id] ?? null
+        }))
+        apiBulkProgress(entries).catch(err => console.error('Failed to sync progress:', err))
+      }, 1000)
     }
+    return () => { if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current) }
   }, [points, userInfo, isLoading])
 
   const stats = useMemo(() => {
@@ -182,6 +205,11 @@ function App() {
       const quality = mastery === 'mastered' ? 5 : mastery === 'progress' ? 3 : 1
       const updatedSr = updateSpacedRepetition(userInfo.id, pointId, quality)
       setSrData(prev => ({ ...prev, [pointId]: updatedSr }))
+      // Sync to API
+      const point = points.find(p => p.id === pointId)
+      apiUpdateProgress(pointId, mastery, point?.notes, updatedSr).catch(err => 
+        console.error('Failed to sync mastery:', err)
+      )
     }
   }
 
@@ -189,9 +217,16 @@ function App() {
     setPoints(importedPoints)
   }
 
-  const handleAdminSave = (updatedPoints: KnowledgePoint[]) => {
+  const handleAdminSave = async (updatedPoints: KnowledgePoint[]) => {
     setPoints(updatedPoints)
     setAdminMode(false)
+    // Sync points to API (admin only)
+    const result = await apiUpdatePoints(updatedPoints)
+    if (result.ok) {
+      toast.success('Points synchronisés avec le serveur')
+    } else {
+      toast.error('Erreur lors de la synchronisation : ' + (result.error ?? ''))
+    }
   }
 
   const handlePointUpdate = (updatedPoint: KnowledgePoint) => {
