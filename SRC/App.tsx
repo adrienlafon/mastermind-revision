@@ -57,8 +57,9 @@ function App() {
       // Load points from API
       let loadedPoints: KnowledgePoint[] = INITIAL_KNOWLEDGE_POINTS
       const pointsResult = await apiGetPoints()
-      if (pointsResult.ok && pointsResult.data?.points?.length > 0) {
-        loadedPoints = pointsResult.data.points.map((p: any) => ({
+      const apiPoints = pointsResult.data?.points
+      if (pointsResult.ok && apiPoints && apiPoints.length > 0) {
+        loadedPoints = apiPoints.map((p: any) => ({
           id: p.pointId ?? p.id,
           title: p.title,
           description: p.description,
@@ -70,9 +71,10 @@ function App() {
 
       // Load user progress from API
       const progressResult = await apiGetProgress()
-      if (progressResult.ok && progressResult.data?.progress?.length > 0) {
+      const apiProgress = progressResult.data?.progress
+      if (progressResult.ok && apiProgress && apiProgress.length > 0) {
         const progressMap = new Map(
-          progressResult.data.progress.map((p: any) => [p.pointId, p])
+          apiProgress.map((p: any) => [p.pointId, p])
         )
         loadedPoints = loadedPoints.map(point => {
           const prog = progressMap.get(point.id)
@@ -88,7 +90,7 @@ function App() {
 
         // Load SR data from progress entries
         const srFromApi: Record<number, SpacedRepetitionEntry> = {}
-        progressResult.data.progress.forEach((p: any) => {
+        apiProgress.forEach((p: any) => {
           if (p.srData) srFromApi[p.pointId] = p.srData
         })
         if (Object.keys(srFromApi).length > 0) {
