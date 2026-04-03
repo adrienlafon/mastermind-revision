@@ -119,6 +119,10 @@ export async function apiDeleteUser(userId: string) {
   })
 }
 
+export async function apiGetUserProgress(userId: string) {
+  return apiFetch<{ progress: any[] }>(`/users/${encodeURIComponent(userId)}/progress`)
+}
+
 /**
  * Check if the API is available
  */

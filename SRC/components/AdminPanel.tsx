@@ -5,9 +5,10 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Card } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { X, Plus, FloppyDisk, ArrowLeft, Trash } from '@phosphor-icons/react'
+import { X, Plus, FloppyDisk, ArrowLeft, Trash, Users } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
+import { UserManagement } from './UserManagement'
 
 interface AdminPanelProps {
   points: KnowledgePoint[]
@@ -18,6 +19,7 @@ interface AdminPanelProps {
 export function AdminPanel({ points, onSave, onExit }: AdminPanelProps) {
   const [editedPoints, setEditedPoints] = useState<KnowledgePoint[]>(points)
   const [hasChanges, setHasChanges] = useState(false)
+  const [activeTab, setActiveTab] = useState<'themes' | 'users'>('themes')
 
   useEffect(() => {
     setHasChanges(JSON.stringify(points) !== JSON.stringify(editedPoints))
@@ -62,6 +64,10 @@ export function AdminPanel({ points, onSave, onExit }: AdminPanelProps) {
     }
   }
 
+  if (activeTab === 'users') {
+    return <UserManagement onExit={() => setActiveTab('themes')} />
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <div className="sticky top-0 z-10 border-b bg-card shadow-sm">
@@ -90,6 +96,13 @@ export function AdminPanel({ points, onSave, onExit }: AdminPanelProps) {
                   Modifications non sauvegardées
                 </Badge>
               )}
+              <Button
+                variant="outline"
+                onClick={() => setActiveTab('users')}
+              >
+                <Users className="mr-2" weight="bold" />
+                Utilisateurs
+              </Button>
               <Button
                 variant="outline"
                 onClick={handleAddPoint}

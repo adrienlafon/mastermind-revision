@@ -1,5 +1,5 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions'
-import { getDatabase, getUsersContainer } from '../shared/cosmos.js'
+import { getDatabase, getUsersContainer, getProgressContainer } from '../shared/cosmos.js'
 import { getAuthFromRequest } from '../shared/auth-utils.js'
 
 // GET /api/users - list all users (admin only)
@@ -52,6 +52,37 @@ app.http('usersDelete', {
       return { jsonBody: { success: true } }
     } catch (error) {
       context.error('Delete user error:', error)
+      return { status: 500, jsonBody: { error: 'Erreur interne du serveur.' } }
+    }
+  }
+})
+
+// GET /api/users/{userId}/progress - get a specific user's progress (admin only)
+app.http('usersProgress', {
+  methods: ['GET'],
+  authLevel: 'anonymous',
+  route: 'users/{userId}/progress',
+  handler: async (req: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
+    const auth = getAuthFromRequest(req)
+    if (!auth) return { status: 401, jsonBody: { error: 'Non authentifié.' } }
+    if (!auth.isOwner) return { status: 403, jsonBody: { error: 'Accès réservé à l\'administrateur.' } }
+
+    const userId = req.params.userId
+    if (!userId) return { status: 400, jsonBody: { error: 'userId est requis.' } }
+
+    try {
+      const db = await getDatabase()
+      const container = getProgressContainer(db)
+      const { resources: progress } = await container.items
+        .query({
+          query: 'SELECT * FROM c WHERE c.userId = @userId',
+          parameters: [{ name: '@userId', value: userId }]
+        })
+        .fetchAll()
+
+      return { jsonBody: { progress } }
+    } catch (error) {
+      context.error('Get user progress error:', error)
       return { status: 500, jsonBody: { error: 'Erreur interne du serveur.' } }
     }
   }
