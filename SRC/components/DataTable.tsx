@@ -173,8 +173,8 @@ export function DataTable({ points, onPointClick, onPointUpdate }: DataTableProp
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-4 flex-wrap items-center">
-        <div className="relative flex-1 min-w-[250px]">
+      <div className="flex flex-col md:flex-row gap-2 md:gap-4 flex-wrap items-stretch md:items-center">
+        <div className="relative flex-1">
           <MagnifyingGlass 
             className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" 
             size={18}
@@ -188,9 +188,10 @@ export function DataTable({ points, onPointClick, onPointUpdate }: DataTableProp
           />
         </div>
 
-        <Select value={categoryFilter.toString()} onValueChange={(v) => setCategoryFilter(v === 'all' ? 'all' : parseInt(v))}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Catégorie" />
+        <div className="flex gap-2">
+          <Select value={categoryFilter.toString()} onValueChange={(v) => setCategoryFilter(v === 'all' ? 'all' : parseInt(v))}>
+            <SelectTrigger className="flex-1 md:w-[200px]">
+              <SelectValue placeholder="Catégorie" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Toutes les catégories</SelectItem>
@@ -203,7 +204,7 @@ export function DataTable({ points, onPointClick, onPointUpdate }: DataTableProp
         </Select>
         
         <Select value={masteryFilter} onValueChange={(v) => setMasteryFilter(v as MasteryLevel | 'all')}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="flex-1 md:w-[180px]">
             <SelectValue placeholder="Niveau de maîtrise" />
           </SelectTrigger>
           <SelectContent>
@@ -220,8 +221,9 @@ export function DataTable({ points, onPointClick, onPointUpdate }: DataTableProp
           className="gap-2"
         >
           <FileXls weight="bold" size={18} />
-          Exporter Excel
+          <span className="hidden md:inline">Exporter Excel</span>
         </Button>
+        </div>
       </div>
 
       <div className="border rounded-lg overflow-hidden bg-card">
@@ -229,7 +231,7 @@ export function DataTable({ points, onPointClick, onPointUpdate }: DataTableProp
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/50">
-                <TableHead className="w-[80px]">
+                <TableHead className="w-[50px] hidden sm:table-cell">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -252,7 +254,7 @@ export function DataTable({ points, onPointClick, onPointUpdate }: DataTableProp
                   </Button>
                 </TableHead>
                 <TableHead className="hidden md:table-cell">Description</TableHead>
-                <TableHead className="w-[160px]">
+                <TableHead className="w-[120px] hidden lg:table-cell">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -263,7 +265,7 @@ export function DataTable({ points, onPointClick, onPointUpdate }: DataTableProp
                     <SortIcon field="category" />
                   </Button>
                 </TableHead>
-                <TableHead className="w-[140px]">
+                <TableHead className="w-[120px]">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -274,8 +276,8 @@ export function DataTable({ points, onPointClick, onPointUpdate }: DataTableProp
                     <SortIcon field="mastery" />
                   </Button>
                 </TableHead>
-                <TableHead className="w-[100px]">Vidéo</TableHead>
-                <TableHead className="w-[120px]">Actions</TableHead>
+                <TableHead className="w-[60px] hidden md:table-cell">Vidéo</TableHead>
+                <TableHead className="w-[80px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -285,13 +287,13 @@ export function DataTable({ points, onPointClick, onPointUpdate }: DataTableProp
                 
                 return isEditing ? (
                   <TableRow key={point.id} className="bg-accent/10">
-                    <TableCell className="font-medium text-muted-foreground">
+                    <TableCell className="font-medium text-muted-foreground hidden sm:table-cell">
                     </TableCell>
                     <TableCell>
                       <Input
                         value={editTitle}
                         onChange={(e) => setEditTitle(e.target.value)}
-                        className="min-w-[200px]"
+                        className="w-full"
                         placeholder="Titre"
                       />
                     </TableCell>
@@ -299,11 +301,11 @@ export function DataTable({ points, onPointClick, onPointUpdate }: DataTableProp
                       <Textarea
                         value={editDescription}
                         onChange={(e) => setEditDescription(e.target.value)}
-                        className="min-w-[300px] min-h-[80px]"
+                        className="w-full min-h-[60px] md:min-h-[80px]"
                         placeholder="Description"
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden lg:table-cell">
                       <div className="text-sm text-muted-foreground">
                         {category?.name || 'Non catégorisé'}
                       </div>
@@ -320,7 +322,7 @@ export function DataTable({ points, onPointClick, onPointUpdate }: DataTableProp
                         </SelectContent>
                       </Select>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell">
                       {point.videoLink && (
                         <a
                           href={point.videoLink}
@@ -359,9 +361,9 @@ export function DataTable({ points, onPointClick, onPointUpdate }: DataTableProp
                     key={point.id}
                     className="cursor-pointer hover:bg-muted/50 transition-colors"
                   >
-                    <TableCell className="font-medium text-muted-foreground">
+                    <TableCell className="font-medium text-muted-foreground hidden sm:table-cell">
                     </TableCell>
-                    <TableCell className="font-medium" onClick={() => onPointClick(point)}>
+                    <TableCell className="font-medium text-sm" onClick={() => onPointClick(point)}>
                       {point.title}
                     </TableCell>
                     <TableCell className="hidden md:table-cell text-sm text-muted-foreground" onClick={() => onPointClick(point)}>
@@ -369,7 +371,7 @@ export function DataTable({ points, onPointClick, onPointUpdate }: DataTableProp
                         {point.description}
                       </div>
                     </TableCell>
-                    <TableCell onClick={() => onPointClick(point)}>
+                    <TableCell onClick={() => onPointClick(point)} className="hidden lg:table-cell">
                       <div 
                         className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium border"
                         style={{
@@ -384,7 +386,7 @@ export function DataTable({ points, onPointClick, onPointUpdate }: DataTableProp
                     <TableCell onClick={() => onPointClick(point)}>
                       <MasteryBadge mastery={point.mastery} />
                     </TableCell>
-                    <TableCell onClick={(e) => e.stopPropagation()}>
+                    <TableCell onClick={(e) => e.stopPropagation()} className="hidden md:table-cell">
                       {point.videoLink ? (
                         <a
                           href={point.videoLink}

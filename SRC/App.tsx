@@ -290,43 +290,43 @@ function App() {
     <ThemeContext.Provider value={{ theme, toggle: toggleTheme }}>
     <div className="min-h-screen bg-background">
       <div className="border-b bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] animate-gradient">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8">
-          <div className="flex items-start justify-between gap-4 flex-wrap">
-            <div className="flex-1">
-              <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 tracking-tight">MasterMind</h1>
-              <p className="text-white/90 text-sm md:text-base">
-                Maîtrisez les 70 techniques essentielles de JJB - Votre progression personnelle
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-8">
+          <div className="flex items-center justify-between gap-2 md:gap-4">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl md:text-4xl font-bold text-white mb-1 md:mb-2 tracking-tight">MasterMind</h1>
+              <p className="text-white/90 text-xs md:text-base truncate">
+                Maîtrisez les 70 techniques de JJB
               </p>
             </div>
-            <div className="flex gap-2 flex-wrap items-center">
+            <div className="flex gap-1.5 md:gap-2 items-center shrink-0">
               <Button
                 onClick={toggleTheme}
                 variant="secondary"
                 size="icon"
-                className="bg-white/20 text-white hover:bg-white/30 border-2 border-white/30"
+                className="h-9 w-9 md:h-10 md:w-10 bg-white/20 text-white hover:bg-white/30 border border-white/30 md:border-2"
                 title={theme === 'light' ? 'Mode sombre' : 'Mode clair'}
               >
-                {theme === 'light' ? <Moon weight="bold" /> : <Sun weight="bold" />}
+                {theme === 'light' ? <Moon weight="bold" size={18} /> : <Sun weight="bold" size={18} />}
               </Button>
               {userInfo && userInfo.isOwner && (
                 <>
                   <Button 
                     onClick={() => setAdminMode(true)}
                     variant="secondary"
-                    size="lg"
-                    className="bg-white/20 text-white hover:bg-white/30 font-semibold border-2 border-white/30"
+                    size="icon"
+                    className="h-9 w-9 md:h-auto md:w-auto md:px-4 md:py-2 bg-white/20 text-white hover:bg-white/30 font-semibold border border-white/30 md:border-2"
                   >
-                    <GearSix className="mr-2" weight="bold" />
-                    Administration
+                    <GearSix weight="bold" size={18} />
+                    <span className="hidden md:inline ml-2">Administration</span>
                   </Button>
                   <Button 
                     onClick={() => setImportDialogOpen(true)}
                     variant="secondary"
-                    size="lg"
-                    className="bg-white/20 text-white hover:bg-white/30 font-semibold border-2 border-white/30"
+                    size="icon"
+                    className="h-9 w-9 md:h-auto md:w-auto md:px-4 md:py-2 bg-white/20 text-white hover:bg-white/30 font-semibold border border-white/30 md:border-2"
                   >
-                    <Upload className="mr-2" weight="bold" />
-                    Importer
+                    <Upload weight="bold" size={18} />
+                    <span className="hidden md:inline ml-2">Importer</span>
                   </Button>
                 </>
               )}
@@ -377,18 +377,18 @@ function App() {
               )}
               <Button 
                 onClick={() => setStatsMode(true)} 
-                size="lg"
-                className="bg-white text-primary hover:bg-white/90 font-semibold shadow-lg"
+                size="icon"
+                className="h-9 w-9 md:h-auto md:w-auto md:px-4 md:py-2 bg-white text-primary hover:bg-white/90 font-semibold shadow-lg"
               >
-                <ChartBar className="mr-2" weight="bold" />
-                Statistiques
+                <ChartBar weight="bold" size={18} />
+                <span className="hidden md:inline ml-2">Statistiques</span>
               </Button>
             </div>
           </div>
         </div>
       </div>
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 space-y-6">
-        <div className="bg-card rounded-xl border-2 p-6 shadow-sm">
+        <div className="bg-card rounded-xl border-2 p-4 md:p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold">Progression globale</h2>
             <span className="text-2xl font-bold text-primary">
@@ -396,7 +396,7 @@ function App() {
             </span>
           </div>
           <Progress value={stats.masteryPercent} className="h-3 mb-4" />
-          <div className="grid grid-cols-3 gap-4 text-center">
+          <div className="grid grid-cols-3 gap-2 md:gap-4 text-center">
             <div>
               <div className="text-2xl font-bold text-[oklch(0.65_0.19_25)]">{stats.weak}</div>
               <div className="text-xs text-muted-foreground uppercase tracking-wide">Faible</div>
@@ -412,11 +412,11 @@ function App() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between gap-2 md:gap-4 flex-wrap">
+          <div className="flex items-center gap-2 md:gap-3">
             <div className="flex items-center gap-2">
-              <List weight="bold" className="text-muted-foreground" />
-              <h2 className="text-xl font-semibold">
+              <List weight="bold" className="text-muted-foreground hidden md:block" />
+              <h2 className="text-base md:text-xl font-semibold">
                 {filterLevel === 'all' ? 'Tous les points' : `Points : ${filteredPoints.length}`}
               </h2>
             </div>
@@ -442,21 +442,23 @@ function App() {
           </div>
           
           {viewMode === 'grid' && (
-            <Tabs value={filterLevel} onValueChange={(v) => setFilterLevel(v as MasteryLevel | 'all' | 'due')}>
-              <TabsList>
-                <TabsTrigger value="all">Tous ({stats.total})</TabsTrigger>
-                <TabsTrigger value="due" className="text-primary">À réviser ({stats.dueCount})</TabsTrigger>
-                <TabsTrigger value="weak">Faible ({stats.weak})</TabsTrigger>
-                <TabsTrigger value="progress">En cours ({stats.progress})</TabsTrigger>
-                <TabsTrigger value="mastered">Maîtrisé ({stats.mastered})</TabsTrigger>
-              </TabsList>
-            </Tabs>
+            <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+              <Tabs value={filterLevel} onValueChange={(v) => setFilterLevel(v as MasteryLevel | 'all' | 'due')}>
+                <TabsList className="h-auto flex-wrap md:flex-nowrap">
+                  <TabsTrigger value="all" className="text-xs md:text-sm">Tous ({stats.total})</TabsTrigger>
+                  <TabsTrigger value="due" className="text-xs md:text-sm text-primary">À réviser ({stats.dueCount})</TabsTrigger>
+                  <TabsTrigger value="weak" className="text-xs md:text-sm">Faible ({stats.weak})</TabsTrigger>
+                  <TabsTrigger value="progress" className="text-xs md:text-sm">En cours ({stats.progress})</TabsTrigger>
+                  <TabsTrigger value="mastered" className="text-xs md:text-sm">Maîtrisé ({stats.mastered})</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
           )}
         </div>
 
         {viewMode === 'grid' ? (
           <>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
               {filteredPoints.map(point => (
                 <KnowledgeCard 
                   key={point.id}

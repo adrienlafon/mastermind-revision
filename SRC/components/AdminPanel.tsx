@@ -72,19 +72,19 @@ export function AdminPanel({ points, onSave, onExit }: AdminPanelProps) {
     <div className="min-h-screen bg-background">
       <div className="sticky top-0 z-10 border-b bg-card shadow-sm">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-4">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between gap-2 md:gap-4 flex-wrap">
+            <div className="flex items-center gap-2 md:gap-3">
               <Button 
                 variant="ghost" 
                 size="sm"
                 onClick={onExit}
               >
-                <ArrowLeft className="mr-2" weight="bold" />
-                Retour
+                <ArrowLeft className="mr-1 md:mr-2" weight="bold" />
+                <span className="hidden md:inline">Retour</span>
               </Button>
               <div>
-                <h1 className="text-2xl font-bold">Administration des Thèmes</h1>
-                <p className="text-sm text-muted-foreground">
+                <h1 className="text-lg md:text-2xl font-bold">Administration</h1>
+                <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">
                   Modification en bulk de tous les points de connaissance
                 </p>
               </div>
@@ -134,7 +134,7 @@ export function AdminPanel({ points, onSave, onExit }: AdminPanelProps) {
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
         <div className="space-y-4">
           {editedPoints.map((point) => (
-            <Card key={point.id} className="p-6 hover:shadow-md transition-shadow">
+            <Card key={point.id} className="p-4 md:p-6 hover:shadow-md transition-shadow">
               <div className="space-y-5">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-3 flex-1">

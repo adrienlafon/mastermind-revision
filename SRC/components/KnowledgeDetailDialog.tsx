@@ -65,23 +65,23 @@ export function KnowledgeDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] md:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1">
-              <DialogTitle className="text-2xl font-bold leading-tight pr-8">
+          <div className="flex items-start justify-between gap-2 md:gap-4">
+            <div className="flex-1 min-w-0">
+              <DialogTitle className="text-lg md:text-2xl font-bold leading-tight pr-4 md:pr-8">
                 {point.title}
               </DialogTitle>
             </div>
           </div>
         </DialogHeader>
         
-        <div className="space-y-6 py-4">
+        <div className="space-y-4 md:space-y-6 py-2 md:py-4">
           <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-3">
+            <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground mb-2 md:mb-3">
               Description
             </h4>
-            <p className="text-base leading-relaxed">
+            <p className="text-sm md:text-base leading-relaxed">
               {point.description}
             </p>
           </div>
@@ -95,25 +95,25 @@ export function KnowledgeDetailDialog({
               onValueChange={(value) => onMasteryChange(point.id, value as MasteryLevel)}
               className="gap-3"
             >
-              <div className="flex items-center space-x-3 border-2 rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors has-[:checked]:border-[oklch(0.65_0.19_25)] has-[:checked]:bg-[oklch(0.65_0.19_25)]/5">
+              <div className="flex items-center space-x-2 md:space-x-3 border-2 rounded-lg p-3 md:p-4 cursor-pointer hover:bg-muted/50 transition-colors has-[:checked]:border-[oklch(0.65_0.19_25)] has-[:checked]:bg-[oklch(0.65_0.19_25)]/5">
                 <RadioGroupItem value="weak" id="weak" />
-                <Label htmlFor="weak" className="flex-1 cursor-pointer flex items-center justify-between">
+                <Label htmlFor="weak" className="flex-1 cursor-pointer flex items-center justify-between text-sm md:text-base">
                   <span className="font-medium">Faible</span>
                   <MasteryBadge mastery="weak" />
                 </Label>
               </div>
               
-              <div className="flex items-center space-x-3 border-2 rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors has-[:checked]:border-[oklch(0.70_0.15_60)] has-[:checked]:bg-[oklch(0.70_0.15_60)]/5">
+              <div className="flex items-center space-x-2 md:space-x-3 border-2 rounded-lg p-3 md:p-4 cursor-pointer hover:bg-muted/50 transition-colors has-[:checked]:border-[oklch(0.70_0.15_60)] has-[:checked]:bg-[oklch(0.70_0.15_60)]/5">
                 <RadioGroupItem value="progress" id="progress" />
-                <Label htmlFor="progress" className="flex-1 cursor-pointer flex items-center justify-between">
+                <Label htmlFor="progress" className="flex-1 cursor-pointer flex items-center justify-between text-sm md:text-base">
                   <span className="font-medium">En cours de travail</span>
                   <MasteryBadge mastery="progress" />
                 </Label>
               </div>
               
-              <div className="flex items-center space-x-3 border-2 rounded-lg p-4 cursor-pointer hover:bg-muted/50 transition-colors has-[:checked]:border-[oklch(0.65_0.17_155)] has-[:checked]:bg-[oklch(0.65_0.17_155)]/5">
+              <div className="flex items-center space-x-2 md:space-x-3 border-2 rounded-lg p-3 md:p-4 cursor-pointer hover:bg-muted/50 transition-colors has-[:checked]:border-[oklch(0.65_0.17_155)] has-[:checked]:bg-[oklch(0.65_0.17_155)]/5">
                 <RadioGroupItem value="mastered" id="mastered" />
-                <Label htmlFor="mastered" className="flex-1 cursor-pointer flex items-center justify-between">
+                <Label htmlFor="mastered" className="flex-1 cursor-pointer flex items-center justify-between text-sm md:text-base">
                   <span className="font-medium">Maîtrisé</span>
                   <MasteryBadge mastery="mastered" />
                 </Label>
@@ -161,7 +161,7 @@ export function KnowledgeDetailDialog({
               placeholder="Ajoutez vos notes, exemples de code, liens utiles..."
               value={notes}
               onChange={(e) => handleNotesChange(e.target.value)}
-              className="mt-3 min-h-[150px] font-mono text-sm"
+              className="mt-3 min-h-[100px] md:min-h-[150px] font-mono text-sm"
             />
           </div>
 

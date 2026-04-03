@@ -72,12 +72,12 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-8">
+      <div className="w-full max-w-md space-y-4 md:space-y-8">
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-accent mb-4">
-            <Brain className="text-white" size={32} weight="bold" />
+          <div className="inline-flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-primary to-accent mb-3 md:mb-4">
+            <Brain className="text-white" size={28} weight="bold" />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">MasterMind</h1>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">MasterMind</h1>
           <p className="text-muted-foreground mt-2">
             Révisez et maîtrisez les 70 techniques de JJB
           </p>

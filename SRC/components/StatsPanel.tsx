@@ -102,12 +102,12 @@ export function StatsPanel({ points, srData, onExit }: StatsPanelProps) {
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-3">
               <Button variant="ghost" size="sm" onClick={onExit}>
-                <ArrowLeft className="mr-2" weight="bold" />
-                Retour
+                <ArrowLeft className="mr-1 md:mr-2" weight="bold" />
+                <span className="hidden md:inline">Retour</span>
               </Button>
               <div>
-                <h1 className="text-2xl font-bold">Statistiques</h1>
-                <p className="text-sm text-muted-foreground">Vue d'ensemble de votre progression</p>
+                <h1 className="text-lg md:text-2xl font-bold">Statistiques</h1>
+                <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">Vue d'ensemble de votre progression</p>
               </div>
             </div>
           </div>
@@ -116,35 +116,35 @@ export function StatsPanel({ points, srData, onExit }: StatsPanelProps) {
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 space-y-6">
         {/* Summary Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
           <Card>
-            <CardContent className="p-4 text-center">
-              <Brain className="h-8 w-8 mx-auto mb-2 text-primary" weight="bold" />
-              <div className="text-3xl font-bold">{stats.mastered}</div>
+            <CardContent className="p-3 md:p-4 text-center">
+              <Brain className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-1 md:mb-2 text-primary" weight="bold" />
+              <div className="text-2xl md:text-3xl font-bold">{stats.mastered}</div>
               <div className="text-xs text-muted-foreground uppercase tracking-wide">Maîtrisés</div>
               <div className="text-sm text-primary font-medium">{Math.round(stats.masteryPercent)}%</div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4 text-center">
-              <ClockCountdown className="h-8 w-8 mx-auto mb-2 text-[oklch(0.65_0.19_25)]" weight="bold" />
-              <div className="text-3xl font-bold">{stats.dueForReview}</div>
+            <CardContent className="p-3 md:p-4 text-center">
+              <ClockCountdown className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-1 md:mb-2 text-[oklch(0.65_0.19_25)]" weight="bold" />
+              <div className="text-2xl md:text-3xl font-bold">{stats.dueForReview}</div>
               <div className="text-xs text-muted-foreground uppercase tracking-wide">À réviser</div>
               <div className="text-sm text-muted-foreground">aujourd'hui</div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4 text-center">
-              <TrendUp className="h-8 w-8 mx-auto mb-2 text-[oklch(0.65_0.17_155)]" weight="bold" />
-              <div className="text-3xl font-bold">{stats.totalReviews}</div>
+            <CardContent className="p-3 md:p-4 text-center">
+              <TrendUp className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-1 md:mb-2 text-[oklch(0.65_0.17_155)]" weight="bold" />
+              <div className="text-2xl md:text-3xl font-bold">{stats.totalReviews}</div>
               <div className="text-xs text-muted-foreground uppercase tracking-wide">Révisions totales</div>
               <div className="text-sm text-muted-foreground">{stats.recentReviews} cette semaine</div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4 text-center">
-              <Fire className="h-8 w-8 mx-auto mb-2 text-[oklch(0.70_0.15_60)]" weight="bold" />
-              <div className="text-3xl font-bold">{stats.streak}</div>
+            <CardContent className="p-3 md:p-4 text-center">
+              <Fire className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-1 md:mb-2 text-[oklch(0.70_0.15_60)]" weight="bold" />
+              <div className="text-2xl md:text-3xl font-bold">{stats.streak}</div>
               <div className="text-xs text-muted-foreground uppercase tracking-wide">Jours consécutifs</div>
               <div className="text-sm text-muted-foreground">série en cours</div>
             </CardContent>
@@ -160,7 +160,7 @@ export function StatsPanel({ points, srData, onExit }: StatsPanelProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-end gap-1 h-32">
+            <div className="flex items-end gap-0.5 md:gap-1 h-24 md:h-32">
               {stats.activity.map((day, i) => (
                 <div key={day.date} className="flex-1 flex flex-col items-center group relative">
                   <div className="absolute -top-8 bg-popover border rounded px-2 py-0.5 text-xs hidden group-hover:block whitespace-nowrap z-10 shadow">
@@ -224,10 +224,10 @@ export function StatsPanel({ points, srData, onExit }: StatsPanelProps) {
             <div className="space-y-4">
               {stats.categoryStats.map(cat => (
                 <div key={cat.id} className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }} />
-                      <span className="text-sm font-medium">{cat.name}</span>
+                    <div className="flex items-center justify-between flex-wrap gap-1">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
+                        <span className="text-xs md:text-sm font-medium truncate">{cat.name}</span>
                     </div>
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
                       <span>{cat.mastered}/{cat.total} maîtrisés</span>

@@ -153,10 +153,10 @@ export function UserManagement({ onExit }: UserManagementProps) {
         <div className="grid gap-4">
           {users.map(user => (
             <Card key={user.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between gap-4 flex-wrap">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <CardContent className="p-4 md:p-5">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 md:gap-4">
+                  <div className="flex items-center gap-3 md:gap-4 min-w-0">
+                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                       <User className="text-primary" size={24} weight="bold" />
                     </div>
                     <div>
@@ -168,7 +168,7 @@ export function UserManagement({ onExit }: UserManagementProps) {
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-4 text-xs md:text-sm text-muted-foreground mt-1">
                         <span className="flex items-center gap-1">
                           <Envelope size={14} />
                           {user.email}
@@ -215,7 +215,7 @@ export function UserManagement({ onExit }: UserManagementProps) {
 
       {/* Progress Dialog */}
       <Dialog open={progressDialogOpen} onOpenChange={setProgressDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] md:max-w-3xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl">
               Progression de {selectedUser?.login}

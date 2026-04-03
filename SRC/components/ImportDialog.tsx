@@ -176,7 +176,7 @@ export function ImportDialog({ open, onOpenChange, onImport, currentPoints }: Im
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
+      <DialogContent className="max-w-[95vw] md:max-w-2xl max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <File weight="bold" className="text-primary" />
