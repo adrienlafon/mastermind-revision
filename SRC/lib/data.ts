@@ -14,121 +14,141 @@ export const INITIAL_KNOWLEDGE_POINTS: KnowledgePoint[] = [
     id: 1,
     title: `Sortie de contrôle latéral 1/3 – Fuite de hanches`,
     description: `Lorsque vous êtes sous contrôle latéral, le véritable problème n’est pas le contrôle de votre torse mais celui de vos hanches. Tant que votre bassin est aligné avec celui de l’adversaire, vous êtes immobilisé mécaniquement. Installez deux frames solides avec vos avant‑bras contre son cou et sa hanche. Gardez les coudes serrés pour protéger vos bras. Poussez avec les pieds pour reculer vos hanches. Votre tête reste au sol pendant le mouvement. Cherchez uniquement à créer de l’espace. Utilisez cet espace pour faire entrer votre genou. Ce genou devient votre première barrière. Sans cette étape, toute poussée des bras sera inefficace.`,
-    mastery: 'weak'
+    mastery: 'weak',
+    videoLink: 'https://www.patreon.com/posts/143704076?collection=1839312'
   },
   {
     id: 2,
     title: `Sortie de contrôle latéral 2/3 – Poids de l'adversaire en avant`,
     description: `Quand son poids est projeté vers votre tête, son centre de gravité devient instable. Utilisez un pont court vers lui pour amplifier ce déséquilibre. Dès qu’il compense, effectuez une fuite de hanches. Le timing prime sur la force. Vos frames maintiennent l’espace pendant la fuite. Déplacez toujours son poids avant le vôtre. Cherchez le genou côté hanche. Insérez-le immédiatement. Recréez ensuite la garde. Stabilisez avant toute transition.`,
-    mastery: 'weak'
+    mastery: 'weak',
+    videoLink: 'https://www.patreon.com/posts/143707036?collection=1839312'
   },
   {
     id: 3,
     title: `Sortie de contrôle latéral 3/3 – Hanches de l'adversaire au sol`,
     description: `Avec des hanches basses, votre adversaire répartit bien son poids. Construisez votre frame côté hanche avant de bouger. Protégez votre cou avec l’autre bras. Reculer vos hanches jusqu’à voir son genou. C’est le repère de l’espace. Ramenez votre genou intérieur. Votre tibia devient un knee shield. Ne tentez pas de vous relever sans ce genou. Ramenez la seconde jambe. Recomposez votre garde.`,
-    mastery: 'weak'
+    mastery: 'weak',
+    videoLink: 'https://www.patreon.com/posts/143707763?collection=1839312'
   },
   {
     id: 4,
     title: `Sortie nord-sud – Retour vers contrôle latéral`,
     description: `Depuis nord‑sud, tournez vers votre adversaire afin de protéger vos épaules. Votre priorité est de protéger vos coudes et votre cou. Installez des grips pour contrôler le membre dangereux. Utilisez vos pieds pour générer le mouvement. Cherchez à déplacer son centre de gravité avant le vôtre. Travaillez toujours l’angle plutôt que la force. Insérez un genou dès que l’espace apparaît. Connectez vos hanches à sa jambe. Verrouillez une position de transition stable. Stabilisez avant d’attaquer. Respirez et progressez sans précipitation.`,
-    mastery: 'weak'
+    mastery: 'weak',
+    videoLink: 'https://www.patreon.com/posts/143708550?collection=1839312'
   },
   {
     id: 5,
     title: `Sortie de genou-poitrine – Retour vers demi-garde`,
     description: `Installez un frame sur son genou pour empêcher la pression sur le torse. Votre priorité est de protéger vos coudes et votre cou. Installez des grips pour contrôler le membre dangereux. Utilisez vos pieds pour générer le mouvement. Cherchez à déplacer son centre de gravité avant le vôtre. Travaillez toujours l’angle plutôt que la force. Insérez un genou dès que l’espace apparaît. Connectez vos hanches à sa jambe. Verrouillez une position de transition stable. Stabilisez avant d’attaquer. Respirez et progressez sans précipitation.`,
-    mastery: 'weak'
+    mastery: 'weak',
+    videoLink: 'https://www.patreon.com/posts/143708928?collection=1839312'
   },
   {
     id: 6,
     title: `Sortie de montée 1/2 – Retour en demi-garde`,
     description: `Piégez sa cheville avec votre pied pour limiter sa base. Votre priorité est de protéger vos coudes et votre cou. Installez des grips pour contrôler le membre dangereux. Utilisez vos pieds pour générer le mouvement. Cherchez à déplacer son centre de gravité avant le vôtre. Travaillez toujours l’angle plutôt que la force. Insérez un genou dès que l’espace apparaît. Connectez vos hanches à sa jambe. Verrouillez une position de transition stable. Stabilisez avant d’attaquer. Respirez et progressez sans précipitation.`,
-    mastery: 'weak'
+    mastery: 'weak',
+    videoLink: 'https://www.patreon.com/posts/143709770?collection=1839312'
   },
   {
     id: 7,
     title: `Sortie de montée 2/2 – Alternative vers garde fermée`,
     description: `Après le pont diagonal, profitez de l’espace entre ses genoux. Votre priorité est de protéger vos coudes et votre cou. Installez des grips pour contrôler le membre dangereux. Utilisez vos pieds pour générer le mouvement. Cherchez à déplacer son centre de gravité avant le vôtre. Travaillez toujours l’angle plutôt que la force. Insérez un genou dès que l’espace apparaît. Connectez vos hanches à sa jambe. Verrouillez une position de transition stable. Stabilisez avant d’attaquer. Respirez et progressez sans précipitation.`,
-    mastery: 'weak'
+    mastery: 'weak',
+    videoLink: 'https://www.patreon.com/posts/143711957?collection=1839312'
   },
   {
     id: 8,
     title: `Défense de tortue 1/2 – Concepts et sortie Makikomi`,
     description: `En tortue, fermez les espaces entre coudes et genoux. Votre priorité est de protéger vos coudes et votre cou. Installez des grips pour contrôler le membre dangereux. Utilisez vos pieds pour générer le mouvement. Cherchez à déplacer son centre de gravité avant le vôtre. Travaillez toujours l’angle plutôt que la force. Insérez un genou dès que l’espace apparaît. Connectez vos hanches à sa jambe. Verrouillez une position de transition stable. Stabilisez avant d’attaquer. Respirez et progressez sans précipitation.`,
-    mastery: 'weak'
+    mastery: 'weak',
+    videoLink: 'https://www.patreon.com/posts/146383719?collection=1839312'
   },
   {
     id: 9,
     title: `Défense de tortue 2/2 – Cas général`,
     description: `Ne restez jamais statique en tortue. Votre priorité est de protéger vos coudes et votre cou. Installez des grips pour contrôler le membre dangereux. Utilisez vos pieds pour générer le mouvement. Cherchez à déplacer son centre de gravité avant le vôtre. Travaillez toujours l’angle plutôt que la force. Insérez un genou dès que l’espace apparaît. Connectez vos hanches à sa jambe. Verrouillez une position de transition stable. Stabilisez avant d’attaquer. Respirez et progressez sans précipitation.`,
-    mastery: 'weak'
+    mastery: 'weak',
+    videoLink: 'https://www.patreon.com/posts/146383719?collection=1839312'
   },
   {
     id: 10,
     title: `Sortie de dos 1/2 – Côté underhook`,
     description: `Descendez du côté où l’adversaire vous tient. Votre priorité est de protéger vos coudes et votre cou. Installez des grips pour contrôler le membre dangereux. Utilisez vos pieds pour générer le mouvement. Cherchez à déplacer son centre de gravité avant le vôtre. Travaillez toujours l’angle plutôt que la force. Insérez un genou dès que l’espace apparaît. Connectez vos hanches à sa jambe. Verrouillez une position de transition stable. Stabilisez avant d’attaquer. Respirez et progressez sans précipitation.`,
-    mastery: 'weak'
+    mastery: 'weak',
+    videoLink: 'https://www.patreon.com/posts/146384298?collection=1839312'
   },
   {
     id: 11,
     title: `Sortie de dos 2/2 – Côté overhook`,
     description: `Contrôlez le bras d’étranglement au poignet. Votre priorité est de protéger vos coudes et votre cou. Installez des grips pour contrôler le membre dangereux. Utilisez vos pieds pour générer le mouvement. Cherchez à déplacer son centre de gravité avant le vôtre. Travaillez toujours l’angle plutôt que la force. Insérez un genou dès que l’espace apparaît. Connectez vos hanches à sa jambe. Verrouillez une position de transition stable. Stabilisez avant d’attaquer. Respirez et progressez sans précipitation.`,
-    mastery: 'weak'
+    mastery: 'weak',
+    videoLink: 'https://www.patreon.com/posts/143713338?collection=1839312'
   },
   {
     id: 12,
     title: `Garde fermée 1/3 – Premiers concepts et prise de dos`,
     description: `Cassez la posture avant toute attaque. Votre priorité est de protéger vos coudes et votre cou. Installez des grips pour contrôler le membre dangereux. Utilisez vos pieds pour générer le mouvement. Cherchez à déplacer son centre de gravité avant le vôtre. Travaillez toujours l’angle plutôt que la force. Insérez un genou dès que l’espace apparaît. Connectez vos hanches à sa jambe. Verrouillez une position de transition stable. Stabilisez avant d’attaquer. Respirez et progressez sans précipitation.`,
-    mastery: 'weak'
+    mastery: 'weak',
+    videoLink: 'https://www.patreon.com/posts/143719952?collection=1839312'
   },
   {
     id: 13,
     title: `Garde fermée 2/3 – Renversement Pendulum`,
     description: `Chargez son poids sur votre hanche. Votre priorité est de protéger vos coudes et votre cou. Installez des grips pour contrôler le membre dangereux. Utilisez vos pieds pour générer le mouvement. Cherchez à déplacer son centre de gravité avant le vôtre. Travaillez toujours l’angle plutôt que la force. Insérez un genou dès que l’espace apparaît. Connectez vos hanches à sa jambe. Verrouillez une position de transition stable. Stabilisez avant d’attaquer. Respirez et progressez sans précipitation.`,
-    mastery: 'weak'
+    mastery: 'weak',
+    videoLink: 'https://www.patreon.com/posts/143720242?collection=1839312'
   },
   {
     id: 14,
     title: `Garde fermée 3/3 – Renversement Hip-Bump`,
     description: `Lorsque l’adversaire se redresse, asseyez-vous sur un coude. Votre priorité est de protéger vos coudes et votre cou. Installez des grips pour contrôler le membre dangereux. Utilisez vos pieds pour générer le mouvement. Cherchez à déplacer son centre de gravité avant le vôtre. Travaillez toujours l’angle plutôt que la force. Insérez un genou dès que l’espace apparaît. Connectez vos hanches à sa jambe. Verrouillez une position de transition stable. Stabilisez avant d’attaquer. Respirez et progressez sans précipitation.`,
-    mastery: 'weak'
+    mastery: 'weak',
+    videoLink: 'https://www.patreon.com/posts/143720514?collection=1839312'
   },
   {
     id: 15,
     title: `Sortie de garde fermée – Concepts et passage`,
     description: `Redressez votre posture avant d’ouvrir. Votre priorité est de protéger vos coudes et votre cou. Installez des grips pour contrôler le membre dangereux. Utilisez vos pieds pour générer le mouvement. Cherchez à déplacer son centre de gravité avant le vôtre. Travaillez toujours l’angle plutôt que la force. Insérez un genou dès que l’espace apparaît. Connectez vos hanches à sa jambe. Verrouillez une position de transition stable. Stabilisez avant d’attaquer. Respirez et progressez sans précipitation.`,
-    mastery: 'weak'
+    mastery: 'weak',
+    videoLink: 'https://www.patreon.com/posts/143721026?collection=1839312'
   },
   {
     id: 16,
     title: `Demi-garde torse contre torse – Sorties`,
     description: `Cherchez l’underhook du côté supérieur. Votre priorité est de protéger vos coudes et votre cou. Installez des grips pour contrôler le membre dangereux. Utilisez vos pieds pour générer le mouvement. Cherchez à déplacer son centre de gravité avant le vôtre. Travaillez toujours l’angle plutôt que la force. Insérez un genou dès que l’espace apparaît. Connectez vos hanches à sa jambe. Verrouillez une position de transition stable. Stabilisez avant d’attaquer. Respirez et progressez sans précipitation.`,
-    mastery: 'weak'
+    mastery: 'weak',
+    videoLink: 'https://www.patreon.com/posts/143728145?collection=1839312'
   },
   {
     id: 17,
     title: `Demi-garde 1/2 – Concepts et premier renversement`,
     description: `Le combat principal est celui de l’underhook. Votre priorité est de protéger vos coudes et votre cou. Installez des grips pour contrôler le membre dangereux. Utilisez vos pieds pour générer le mouvement. Cherchez à déplacer son centre de gravité avant le vôtre. Travaillez toujours l’angle plutôt que la force. Insérez un genou dès que l’espace apparaît. Connectez vos hanches à sa jambe. Verrouillez une position de transition stable. Stabilisez avant d’attaquer. Respirez et progressez sans précipitation.`,
-    mastery: 'weak'
+    mastery: 'weak',
+    videoLink: 'https://www.patreon.com/posts/143727783?collection=1839312'
   },
   {
     id: 18,
     title: `Demi-garde 2/2 – Renversements complémentaires`,
     description: `Si la jambe libre recule, adaptez l’angle. Votre priorité est de protéger vos coudes et votre cou. Installez des grips pour contrôler le membre dangereux. Utilisez vos pieds pour générer le mouvement. Cherchez à déplacer son centre de gravité avant le vôtre. Travaillez toujours l’angle plutôt que la force. Insérez un genou dès que l’espace apparaît. Connectez vos hanches à sa jambe. Verrouillez une position de transition stable. Stabilisez avant d’attaquer. Respirez et progressez sans précipitation.`,
-    mastery: 'weak'
+    mastery: 'weak',
+    videoLink: 'https://www.patreon.com/posts/143728145?collection=1839312'
   },
   {
     id: 19,
     title: `Passage de demi-garde 1/2 – Concepts et désengagement`,
     description: `Installez une crossface pour orienter son regard. Votre priorité est de protéger vos coudes et votre cou. Installez des grips pour contrôler le membre dangereux. Utilisez vos pieds pour générer le mouvement. Cherchez à déplacer son centre de gravité avant le vôtre. Travaillez toujours l’angle plutôt que la force. Insérez un genou dès que l’espace apparaît. Connectez vos hanches à sa jambe. Verrouillez une position de transition stable. Stabilisez avant d’attaquer. Respirez et progressez sans précipitation.`,
-    mastery: 'weak'
+    mastery: 'weak',
+    videoLink: 'https://www.patreon.com/posts/143728553?collection=1839312'
   },
   {
     id: 20,
     title: `Passage de demi-garde 2/2 – Knee cut`,
     description: `Alignez votre genou avec son épaule opposée. Votre priorité est de protéger vos coudes et votre cou. Installez des grips pour contrôler le membre dangereux. Utilisez vos pieds pour générer le mouvement. Cherchez à déplacer son centre de gravité avant le vôtre. Travaillez toujours l’angle plutôt que la force. Insérez un genou dès que l’espace apparaît. Connectez vos hanches à sa jambe. Verrouillez une position de transition stable. Stabilisez avant d’attaquer. Respirez et progressez sans précipitation.`,
-    mastery: 'weak'
+    mastery: 'weak',
+    videoLink: 'https://www.patreon.com/posts/143728553?collection=1839312'
   },
   {
     id: 21,
