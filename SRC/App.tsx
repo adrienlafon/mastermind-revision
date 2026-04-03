@@ -1,33 +1,51 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, createContext, useContext } from 'react'
 import { INITIAL_KNOWLEDGE_POINTS, KnowledgePoint, MasteryLevel } from '@/lib/data'
 import { storage, getCurrentUser, logoutUser, type UserInfo } from '@/lib/storage'
 import { LoginScreen } from '@/components/LoginScreen'
 import { KnowledgeCard } from '@/components/KnowledgeCard'
 import { KnowledgeDetailDialog } from '@/components/KnowledgeDetailDialog'
-import { QuizMode } from '@/components/QuizMode'
 import { ImportDialog } from '@/components/ImportDialog'
 import { DataTable } from '@/components/DataTable'
 import { AdminPanel } from '@/components/AdminPanel'
+import { StatsPanel } from '@/components/StatsPanel'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Brain, List, Upload, Table, GearSix, SignOut } from '@phosphor-icons/react'
+import { List, Upload, Table, GearSix, SignOut, Moon, Sun, ChartBar } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { toast } from 'sonner'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { getSpacedRepetitionData, updateSpacedRepetition, type SpacedRepetitionEntry, isDueForReview } from '@/lib/spaced-repetition'
+
+// Theme context
+type Theme = 'light' | 'dark'
+const ThemeContext = createContext<{ theme: Theme; toggle: () => void }>({ theme: 'light', toggle: () => {} })
+export const useTheme = () => useContext(ThemeContext)
 
 function App() {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
   const [points, setPoints] = useState<KnowledgePoint[]>(INITIAL_KNOWLEDGE_POINTS)
   const [selectedPoint, setSelectedPoint] = useState<KnowledgePoint | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [quizMode, setQuizMode] = useState(false)
-  const [filterLevel, setFilterLevel] = useState<MasteryLevel | 'all'>('all')
+  const [filterLevel, setFilterLevel] = useState<MasteryLevel | 'all' | 'due'>('all')
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
   const [isLoading, setIsLoading] = useState(true)
   const [adminMode, setAdminMode] = useState(false)
+  const [statsMode, setStatsMode] = useState(false)
+  const [srData, setSrData] = useState<Record<number, SpacedRepetitionEntry>>({})
+  const [theme, setTheme] = useState<Theme>(() => {
+    const saved = localStorage.getItem('theme')
+    return (saved === 'dark' ? 'dark' : 'light') as Theme
+  })
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem('theme', theme)
+  }, [theme])
+
+  const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light')
 
   const initializeUserData = (user: UserInfo) => {
     try {
@@ -61,6 +79,9 @@ function App() {
       } else {
         setPoints(INITIAL_KNOWLEDGE_POINTS)
       }
+
+      // Load spaced repetition data
+      setSrData(getSpacedRepetitionData(user.id))
       
       if (!hasSeenWelcome) {
         setTimeout(() => {
@@ -97,8 +118,8 @@ function App() {
     logoutUser()
     setUserInfo(null)
     setPoints(INITIAL_KNOWLEDGE_POINTS)
-    setQuizMode(false)
     setAdminMode(false)
+    setStatsMode(false)
     toast.success('Déconnexion réussie')
   }
 
@@ -124,7 +145,7 @@ function App() {
 
   const stats = useMemo(() => {
     if (!points || !Array.isArray(points) || points.length === 0) {
-      return { total: 0, weak: 0, progress: 0, mastered: 0, masteryPercent: 0 }
+      return { total: 0, weak: 0, progress: 0, mastered: 0, masteryPercent: 0, dueCount: 0 }
     }
     
     const total = points.length
@@ -132,15 +153,17 @@ function App() {
     const progress = points.filter(p => p.mastery === 'progress').length
     const mastered = points.filter(p => p.mastery === 'mastered').length
     const masteryPercent = total > 0 ? (mastered / total) * 100 : 0
+    const dueCount = points.filter(p => isDueForReview(srData[p.id])).length
     
-    return { total, weak, progress, mastered, masteryPercent }
-  }, [points])
+    return { total, weak, progress, mastered, masteryPercent, dueCount }
+  }, [points, srData])
 
   const filteredPoints = useMemo(() => {
     if (!points || !Array.isArray(points)) return []
     if (filterLevel === 'all') return points
+    if (filterLevel === 'due') return points.filter(p => isDueForReview(srData[p.id]))
     return points.filter(p => p.mastery === filterLevel)
-  }, [points, filterLevel])
+  }, [points, filterLevel, srData])
 
   const handleCardClick = (point: KnowledgePoint) => {
     setSelectedPoint(point)
@@ -153,6 +176,12 @@ function App() {
     )
     if (selectedPoint?.id === pointId) {
       setSelectedPoint({ ...selectedPoint, mastery })
+    }
+    // Update spaced repetition data
+    if (userInfo) {
+      const quality = mastery === 'mastered' ? 5 : mastery === 'progress' ? 3 : 1
+      const updatedSr = updateSpacedRepetition(userInfo.id, pointId, quality)
+      setSrData(prev => ({ ...prev, [pointId]: updatedSr }))
     }
   }
 
@@ -207,20 +236,21 @@ function App() {
     )
   }
 
-  if (quizMode) {
+  if (statsMode) {
     return (
-      <div className="min-h-screen bg-background p-4 md:p-6">
-        <QuizMode 
+      <>
+        <StatsPanel 
           points={points}
-          onExit={() => setQuizMode(false)}
-          onMasteryChange={handleMasteryChange}
+          srData={srData}
+          onExit={() => setStatsMode(false)}
         />
         <Toaster />
-      </div>
+      </>
     )
   }
 
   return (
+    <ThemeContext.Provider value={{ theme, toggle: toggleTheme }}>
     <div className="min-h-screen bg-background">
       <div className="border-b bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] animate-gradient">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8">
@@ -232,6 +262,15 @@ function App() {
               </p>
             </div>
             <div className="flex gap-2 flex-wrap items-center">
+              <Button
+                onClick={toggleTheme}
+                variant="secondary"
+                size="icon"
+                className="bg-white/20 text-white hover:bg-white/30 border-2 border-white/30"
+                title={theme === 'light' ? 'Mode sombre' : 'Mode clair'}
+              >
+                {theme === 'light' ? <Moon weight="bold" /> : <Sun weight="bold" />}
+              </Button>
               {userInfo && userInfo.isOwner && (
                 <>
                   <Button 
@@ -287,6 +326,11 @@ function App() {
                       </>
                     )}
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setStatsMode(true)}>
+                      <ChartBar className="mr-2 h-4 w-4" weight="bold" />
+                      Statistiques
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
                       <SignOut className="mr-2 h-4 w-4" weight="bold" />
                       Se déconnecter
@@ -295,12 +339,12 @@ function App() {
                 </DropdownMenu>
               )}
               <Button 
-                onClick={() => setQuizMode(true)} 
+                onClick={() => setStatsMode(true)} 
                 size="lg"
                 className="bg-white text-primary hover:bg-white/90 font-semibold shadow-lg"
               >
-                <Brain className="mr-2" weight="bold" />
-                Mode Quiz
+                <ChartBar className="mr-2" weight="bold" />
+                Statistiques
               </Button>
             </div>
           </div>
@@ -361,9 +405,10 @@ function App() {
           </div>
           
           {viewMode === 'grid' && (
-            <Tabs value={filterLevel} onValueChange={(v) => setFilterLevel(v as MasteryLevel | 'all')}>
+            <Tabs value={filterLevel} onValueChange={(v) => setFilterLevel(v as MasteryLevel | 'all' | 'due')}>
               <TabsList>
                 <TabsTrigger value="all">Tous ({stats.total})</TabsTrigger>
+                <TabsTrigger value="due" className="text-primary">À réviser ({stats.dueCount})</TabsTrigger>
                 <TabsTrigger value="weak">Faible ({stats.weak})</TabsTrigger>
                 <TabsTrigger value="progress">En cours ({stats.progress})</TabsTrigger>
                 <TabsTrigger value="mastered">Maîtrisé ({stats.mastered})</TabsTrigger>
@@ -413,6 +458,7 @@ function App() {
       />
       <Toaster />
     </div>
+    </ThemeContext.Provider>
   );
 }
 

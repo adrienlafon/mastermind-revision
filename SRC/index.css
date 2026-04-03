@@ -38,6 +38,35 @@
   --radius: 0.75rem;
 }
 
+[data-theme="dark"] {
+  --background: oklch(0.15 0.02 240);
+  --foreground: oklch(0.93 0.01 90);
+
+  --card: oklch(0.20 0.02 240);
+  --card-foreground: oklch(0.93 0.01 90);
+  --popover: oklch(0.20 0.02 240);
+  --popover-foreground: oklch(0.93 0.01 90);
+
+  --primary: oklch(0.65 0.15 270);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.30 0.02 240);
+  --secondary-foreground: oklch(0.93 0.01 90);
+  --muted: oklch(0.25 0.02 240);
+  --muted-foreground: oklch(0.65 0.02 240);
+  --accent: oklch(0.55 0.20 300);
+  --accent-foreground: oklch(1 0 0);
+  --destructive: oklch(0.60 0.19 25);
+  --destructive-foreground: oklch(1 0 0);
+
+  --border: oklch(0.30 0.02 240);
+  --input: oklch(0.30 0.02 240);
+  --ring: oklch(0.55 0.20 300);
+
+  --status-weak: oklch(0.60 0.19 25);
+  --status-progress: oklch(0.65 0.15 60);
+  --status-mastered: oklch(0.60 0.17 155);
+}
+
 @theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
