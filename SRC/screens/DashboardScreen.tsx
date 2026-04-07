@@ -30,30 +30,20 @@ export function DashboardScreen({ onNavigate }: Props) {
       {/* Belt selector */}
       <div>
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">Ma ceinture</h2>
-        <div className="flex gap-2">
+        <select
+          value={belt}
+          onChange={e => setBelt(e.target.value as Belt)}
+          className="w-full px-3 py-2.5 rounded-lg border-2 bg-card text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors cursor-pointer"
+        >
           {BELTS.map(b => {
             const config = BELT_CONFIG[b]
-            const isSelected = belt === b
             return (
-              <button
-                key={b}
-                onClick={() => setBelt(b)}
-                className={`flex-1 px-2 py-2.5 rounded-xl text-xs font-medium border-2 transition-all ${
-                  isSelected
-                    ? 'border-primary scale-105 shadow-lg'
-                    : 'border-border hover:border-primary/30'
-                }`}
-              >
-                <div className="text-center">
-                  <div className="text-lg mb-0.5">{config.icon}</div>
-                  <div className={isSelected ? 'text-foreground font-bold' : 'text-muted-foreground'}>
-                    {config.label}
-                  </div>
-                </div>
-              </button>
+              <option key={b} value={b}>
+                {config.icon} Ceinture {config.label}
+              </option>
             )
           })}
-        </div>
+        </select>
       </div>
 
       {/* Belt objectives */}
