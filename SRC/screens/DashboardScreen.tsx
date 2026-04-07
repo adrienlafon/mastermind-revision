@@ -1,21 +1,24 @@
 import { useAppStore, type AppState } from '../lib/store'
-import { CATEGORY_CONFIG, type Category } from '../lib/types'
-import { Target, ChartLineUp, Books } from '@phosphor-icons/react'
+import { BELT_CONFIG, type Belt } from '../lib/types'
+import { Target, ChartLineUp, Books, CheckCircle, Circle } from '@phosphor-icons/react'
 import type { Screen } from '../components/BottomNav'
 
 interface Props {
   onNavigate: (screen: Screen) => void
 }
 
-const CATEGORIES: Category[] = ['defense', 'guard', 'passing', 'submission']
+const BELTS: Belt[] = ['white', 'blue', 'purple', 'brown', 'black']
 
 export function DashboardScreen({ onNavigate }: Props) {
-  const getProgressByCategory = useAppStore((s: AppState) => s.getProgressByCategory)
+  const belt = useAppStore((s: AppState) => s.belt)
+  const setBelt = useAppStore((s: AppState) => s.setBelt)
+  const getBeltObjectives = useAppStore((s: AppState) => s.getBeltObjectives)
   const getGamePlanTechniques = useAppStore((s: AppState) => s.getGamePlanTechniques)
   const getProgressionTechniques = useAppStore((s: AppState) => s.getProgressionTechniques)
-  const progress = getProgressByCategory()
+  const objectives = getBeltObjectives()
   const gamePlanCount = getGamePlanTechniques().length
   const progressionCount = getProgressionTechniques().length
+  const completedCount = objectives.filter(o => o.completed).length
 
   return (
     <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
@@ -24,32 +27,69 @@ export function DashboardScreen({ onNavigate }: Props) {
         <p className="text-muted-foreground text-sm">Votre parcours JJB</p>
       </div>
 
-      {/* Progress indicators */}
-      <div className="grid grid-cols-2 gap-3">
-        {CATEGORIES.map(cat => {
-          const config = CATEGORY_CONFIG[cat]
-          const prog = progress[cat]
-          return (
-            <div key={cat} className="bg-card rounded-xl border-2 border-border p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-lg">{config.icon}</span>
-                <span className="text-sm font-semibold">{config.label}</span>
+      {/* Belt selector */}
+      <div>
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">Ma ceinture</h2>
+        <div className="flex gap-2">
+          {BELTS.map(b => {
+            const config = BELT_CONFIG[b]
+            const isSelected = belt === b
+            return (
+              <button
+                key={b}
+                onClick={() => setBelt(b)}
+                className={`flex-1 px-2 py-2.5 rounded-xl text-xs font-medium border-2 transition-all ${
+                  isSelected
+                    ? 'border-primary scale-105 shadow-lg'
+                    : 'border-border hover:border-primary/30'
+                }`}
+              >
+                <div className="text-center">
+                  <div className="text-lg mb-0.5">{config.icon}</div>
+                  <div className={isSelected ? 'text-foreground font-bold' : 'text-muted-foreground'}>
+                    {config.label}
+                  </div>
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Belt objectives */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            Objectifs ceinture {BELT_CONFIG[belt].label.toLowerCase()}
+          </h2>
+          <span className="text-xs font-medium text-primary">
+            {completedCount}/{objectives.length}
+          </span>
+        </div>
+        <div className="space-y-2">
+          {objectives.map((obj, i) => (
+            <div
+              key={i}
+              className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-colors ${
+                obj.completed
+                  ? 'bg-green-500/10 border-green-500/30'
+                  : 'bg-card border-border'
+              }`}
+            >
+              {obj.completed ? (
+                <CheckCircle size={24} weight="fill" className="text-green-500 shrink-0" />
+              ) : (
+                <Circle size={24} className="text-muted-foreground shrink-0" />
+              )}
+              <div className="flex-1 min-w-0">
+                <p className={`text-sm font-semibold ${obj.completed ? 'text-green-500' : ''}`}>
+                  {obj.label}
+                </p>
+                <p className="text-xs text-muted-foreground">{obj.description}</p>
               </div>
-              <div className="text-2xl font-bold mb-1" style={{ color: config.color }}>
-                {prog.percentage}%
-              </div>
-              <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{ width: `${prog.percentage}%`, backgroundColor: config.color }}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                {prog.learned}/{prog.total} maîtrisées
-              </p>
             </div>
-          )
-        })}
+          ))}
+        </div>
       </div>
 
       {/* Navigation cards */}
@@ -100,7 +140,7 @@ export function DashboardScreen({ onNavigate }: Props) {
             </div>
             <div className="flex-1">
               <h3 className="font-semibold">Bibliothèque de techniques</h3>
-              <p className="text-sm text-muted-foreground">Explorez les 70 techniques</p>
+              <p className="text-sm text-muted-foreground">Explorez les techniques</p>
             </div>
             <span className="text-muted-foreground">→</span>
           </div>

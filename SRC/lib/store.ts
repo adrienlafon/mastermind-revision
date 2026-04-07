@@ -1,20 +1,36 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { Technique, UserTechnique, MasteryLevel, TechniqueWithProgress, Category } from './types';
+import { Technique, UserTechnique, MasteryLevel, TechniqueWithProgress, Category, Belt, TechniqueSystem, SystemCategory } from './types';
 import { TECHNIQUES } from './techniques';
 
+export interface BeltObjectiveStatus {
+  label: string;
+  description: string;
+  completed: boolean;
+}
+
 export interface AppState {
+  // User settings
+  belt: Belt;
   // User technique progress
   userTechniques: Record<number, UserTechnique>;
   // Custom techniques added by the user
   customTechniques: Technique[];
+  // Technique systems
+  systems: TechniqueSystem[];
   
   // Actions
+  setBelt: (belt: Belt) => void;
   updateMastery: (techniqueId: number, level: MasteryLevel) => void;
   updateNotes: (techniqueId: number, notes: string) => void;
   toggleGamePlan: (techniqueId: number) => void;
   reorderGamePlan: (fromIndex: number, toIndex: number) => void;
   addCustomTechnique: (technique: Omit<Technique, 'id'>) => number;
+  createSystem: (name: string, category: SystemCategory) => number;
+  deleteSystem: (systemId: number) => void;
+  addTechniqueToSystem: (systemId: number, techniqueId: number) => void;
+  removeTechniqueFromSystem: (systemId: number, techniqueId: number) => void;
+  validateSystem: (systemId: number) => void;
   
   // Computed selectors
   getAllTechniques: () => Technique[];
@@ -23,6 +39,7 @@ export interface AppState {
   getProgressionTechniques: () => TechniqueWithProgress[];
   getGamePlanTechniques: () => TechniqueWithProgress[];
   getProgressByCategory: () => Record<Category, { total: number; learned: number; percentage: number }>;
+  getBeltObjectives: () => BeltObjectiveStatus[];
 }
 
 const getInitialUserTechnique = (techniqueId: number): UserTechnique => ({
@@ -36,8 +53,12 @@ const getInitialUserTechnique = (techniqueId: number): UserTechnique => ({
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
+      belt: 'white' as Belt,
       userTechniques: {},
       customTechniques: [],
+      systems: [],
+
+      setBelt: (belt) => set({ belt }),
 
       updateMastery: (techniqueId, level) => {
         set((state) => ({
@@ -110,6 +131,46 @@ export const useAppStore = create<AppState>()(
         return newId;
       },
 
+      createSystem: (name, category) => {
+        const state = get();
+        const maxId = state.systems.reduce((max, s) => Math.max(max, s.id), 0);
+        const newId = maxId + 1;
+        set({ systems: [...state.systems, { id: newId, name, category, techniqueIds: [], validated: false }] });
+        return newId;
+      },
+
+      deleteSystem: (systemId) => {
+        set((state) => ({ systems: state.systems.filter(s => s.id !== systemId) }));
+      },
+
+      addTechniqueToSystem: (systemId, techniqueId) => {
+        set((state) => ({
+          systems: state.systems.map(s =>
+            s.id === systemId && !s.techniqueIds.includes(techniqueId)
+              ? { ...s, techniqueIds: [...s.techniqueIds, techniqueId], validated: false }
+              : s
+          ),
+        }));
+      },
+
+      removeTechniqueFromSystem: (systemId, techniqueId) => {
+        set((state) => ({
+          systems: state.systems.map(s =>
+            s.id === systemId
+              ? { ...s, techniqueIds: s.techniqueIds.filter(id => id !== techniqueId), validated: false }
+              : s
+          ),
+        }));
+      },
+
+      validateSystem: (systemId) => {
+        set((state) => ({
+          systems: state.systems.map(s =>
+            s.id === systemId ? { ...s, validated: true } : s
+          ),
+        }));
+      },
+
       getAllTechniques: () => {
         return [...TECHNIQUES, ...get().customTechniques];
       },
@@ -176,6 +237,131 @@ export const useAppStore = create<AppState>()(
           };
           return acc;
         }, {} as Record<Category, { total: number; learned: number; percentage: number }>);
+      },
+
+      getBeltObjectives: () => {
+        const state = get();
+        const belt = state.belt;
+        const allTechniques = get().getAllTechniquesWithProgress();
+        const defenseTechniques = allTechniques.filter(t => t.category === 'defense');
+        const defenseMastered = defenseTechniques.filter(
+          t => t.masteryLevel === 'sparring_ok' || t.masteryLevel === 'competition_ok'
+        ).length;
+
+        const guardSystems = state.systems.filter(s => s.category === 'guard');
+        const passingSystems = state.systems.filter(s => s.category === 'passing');
+        const submissionSystems = state.systems.filter(s => s.category === 'submission');
+
+        const validatedGuard = guardSystems.filter(s => s.validated).length;
+        const validatedPassing = passingSystems.filter(s => s.validated).length;
+        const validatedSubmission = submissionSystems.filter(s => s.validated).length;
+
+        const objectives: BeltObjectiveStatus[] = [];
+
+        if (belt === 'white') {
+          objectives.push({
+            label: 'Défenses',
+            description: `Maîtriser toutes les défenses (${defenseMastered}/${defenseTechniques.length})`,
+            completed: defenseTechniques.length > 0 && defenseMastered === defenseTechniques.length,
+          });
+          objectives.push({
+            label: 'Système de garde',
+            description: `1 système de garde validé (${validatedGuard}/1)`,
+            completed: validatedGuard >= 1,
+          });
+          objectives.push({
+            label: 'Système de passage',
+            description: `1 système de passage validé (${validatedPassing}/1)`,
+            completed: validatedPassing >= 1,
+          });
+        } else if (belt === 'blue') {
+          objectives.push({
+            label: 'Défenses',
+            description: `Maîtriser toutes les défenses (${defenseMastered}/${defenseTechniques.length})`,
+            completed: defenseTechniques.length > 0 && defenseMastered === defenseTechniques.length,
+          });
+          objectives.push({
+            label: 'Systèmes de garde',
+            description: `2 systèmes de garde validés (${validatedGuard}/2)`,
+            completed: validatedGuard >= 2,
+          });
+          objectives.push({
+            label: 'Systèmes de passage',
+            description: `2 systèmes de passage validés (${validatedPassing}/2)`,
+            completed: validatedPassing >= 2,
+          });
+          objectives.push({
+            label: 'Système de soumission',
+            description: `1 système de soumission validé (${validatedSubmission}/1)`,
+            completed: validatedSubmission >= 1,
+          });
+        } else if (belt === 'purple') {
+          objectives.push({
+            label: 'Défenses',
+            description: `Maîtriser toutes les défenses (${defenseMastered}/${defenseTechniques.length})`,
+            completed: defenseTechniques.length > 0 && defenseMastered === defenseTechniques.length,
+          });
+          objectives.push({
+            label: 'Systèmes de garde',
+            description: `3 systèmes de garde validés (${validatedGuard}/3)`,
+            completed: validatedGuard >= 3,
+          });
+          objectives.push({
+            label: 'Systèmes de passage',
+            description: `3 systèmes de passage validés (${validatedPassing}/3)`,
+            completed: validatedPassing >= 3,
+          });
+          objectives.push({
+            label: 'Systèmes de soumission',
+            description: `2 systèmes de soumission validés (${validatedSubmission}/2)`,
+            completed: validatedSubmission >= 2,
+          });
+        } else if (belt === 'brown') {
+          objectives.push({
+            label: 'Défenses',
+            description: `Maîtriser toutes les défenses (${defenseMastered}/${defenseTechniques.length})`,
+            completed: defenseTechniques.length > 0 && defenseMastered === defenseTechniques.length,
+          });
+          objectives.push({
+            label: 'Systèmes de garde',
+            description: `4 systèmes de garde validés (${validatedGuard}/4)`,
+            completed: validatedGuard >= 4,
+          });
+          objectives.push({
+            label: 'Systèmes de passage',
+            description: `4 systèmes de passage validés (${validatedPassing}/4)`,
+            completed: validatedPassing >= 4,
+          });
+          objectives.push({
+            label: 'Systèmes de soumission',
+            description: `3 systèmes de soumission validés (${validatedSubmission}/3)`,
+            completed: validatedSubmission >= 3,
+          });
+        } else {
+          // black
+          objectives.push({
+            label: 'Défenses',
+            description: `Maîtriser toutes les défenses (${defenseMastered}/${defenseTechniques.length})`,
+            completed: defenseTechniques.length > 0 && defenseMastered === defenseTechniques.length,
+          });
+          objectives.push({
+            label: 'Systèmes de garde',
+            description: `5 systèmes de garde validés (${validatedGuard}/5)`,
+            completed: validatedGuard >= 5,
+          });
+          objectives.push({
+            label: 'Systèmes de passage',
+            description: `5 systèmes de passage validés (${validatedPassing}/5)`,
+            completed: validatedPassing >= 5,
+          });
+          objectives.push({
+            label: 'Systèmes de soumission',
+            description: `4 systèmes de soumission validés (${validatedSubmission}/4)`,
+            completed: validatedSubmission >= 4,
+          });
+        }
+
+        return objectives;
       },
     }),
     {
