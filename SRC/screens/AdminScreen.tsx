@@ -5,8 +5,8 @@ import { TECHNIQUES } from '../lib/techniques'
 import { CATEGORY_CONFIG, MASTERY_CONFIG, BELT_CONFIG, type Category, type Technique, type MasteryLevel, type Belt } from '../lib/types'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog'
 import { Button } from '../components/ui/button'
-import { ArrowLeft, PencilSimple, Trash, Plus, MagnifyingGlass, Export, X, Users } from '@phosphor-icons/react'
-import { getUsers, deleteUser, type CloudUser } from '../lib/auth'
+import { ArrowLeft, PencilSimple, Trash, Plus, MagnifyingGlass, Export, X, Users, Key } from '@phosphor-icons/react'
+import { getUsers, deleteUser, resetUserPassword, type CloudUser } from '../lib/auth'
 
 type AdminTab = 'techniques' | 'progression' | 'users' | 'export'
 
@@ -529,6 +529,10 @@ function StatCard({ label, value }: { label: string; value: string }) {
 function UsersTab() {
   const [users, setUsers] = useState<CloudUser[]>([])
   const [loading, setLoading] = useState(true)
+  const [resetDialog, setResetDialog] = useState<{ open: boolean; user: CloudUser | null }>({ open: false, user: null })
+  const [newPassword, setNewPassword] = useState('')
+  const [resetError, setResetError] = useState('')
+  const [resetting, setResetting] = useState(false)
 
   const loadUsers = async () => {
     setLoading(true)
@@ -543,6 +547,25 @@ function UsersTab() {
     if (!confirm(`Supprimer l'utilisateur "${user.login}" ? Cette action est irréversible.`)) return
     const ok = await deleteUser(user.id)
     if (ok) setUsers(prev => prev.filter(u => u.id !== user.id))
+  }
+
+  const openResetDialog = (user: CloudUser) => {
+    setNewPassword('')
+    setResetError('')
+    setResetDialog({ open: true, user })
+  }
+
+  const handleResetPassword = async () => {
+    if (!resetDialog.user || !newPassword) return
+    setResetting(true)
+    setResetError('')
+    const result = await resetUserPassword(resetDialog.user.id, newPassword)
+    setResetting(false)
+    if (result.ok) {
+      setResetDialog({ open: false, user: null })
+    } else {
+      setResetError(result.error || 'Erreur')
+    }
   }
 
   if (loading) {
@@ -587,12 +610,22 @@ function UsersTab() {
                   </td>
                   <td className="px-4 py-2.5 text-right">
                     {!u.isOwner && (
-                      <button
-                        onClick={() => handleDelete(u)}
-                        className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-                      >
-                        <Trash size={16} />
-                      </button>
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          onClick={() => openResetDialog(u)}
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                          title="Réinitialiser le mot de passe"
+                        >
+                          <Key size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(u)}
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                          title="Supprimer"
+                        >
+                          <Trash size={16} />
+                        </button>
+                      </div>
                     )}
                   </td>
                 </tr>
@@ -604,6 +637,36 @@ function UsersTab() {
           <p className="text-center text-muted-foreground py-8">Aucun utilisateur trouvé.</p>
         )}
       </div>
+
+      {/* Reset password dialog */}
+      <Dialog open={resetDialog.open} onOpenChange={(open) => { if (!open) setResetDialog({ open: false, user: null }) }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Réinitialiser le mot de passe</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Nouveau mot de passe pour <span className="font-semibold text-foreground">{resetDialog.user?.login}</span>
+          </p>
+          <input
+            type="password"
+            value={newPassword}
+            onChange={e => setNewPassword(e.target.value)}
+            placeholder="Nouveau mot de passe (min. 6 car.)"
+            className="w-full px-3 py-2.5 rounded-lg border-2 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+          />
+          {resetError && (
+            <div className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+              {resetError}
+            </div>
+          )}
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setResetDialog({ open: false, user: null })} className="flex-1">Annuler</Button>
+            <Button onClick={handleResetPassword} disabled={!newPassword || newPassword.length < 6 || resetting} className="flex-1">
+              {resetting ? 'En cours...' : 'Réinitialiser'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

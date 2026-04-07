@@ -160,6 +160,23 @@ export async function deleteUser(userId: string): Promise<boolean> {
   return res.ok
 }
 
+export async function resetUserPassword(userId: string, newPassword: string): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const res = await fetch(`${API_BASE}/users/${encodeURIComponent(userId)}/password`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify({ newPassword }),
+    })
+    if (!res.ok) {
+      const data = await res.json()
+      return { ok: false, error: data.error || 'Erreur' }
+    }
+    return { ok: true }
+  } catch {
+    return { ok: false, error: 'Erreur réseau' }
+  }
+}
+
 export async function getUserProgress(userId: string): Promise<any[]> {
   const res = await fetch(`${API_BASE}/users/${encodeURIComponent(userId)}/progress`, { headers: getHeaders() })
   if (!res.ok) return []
