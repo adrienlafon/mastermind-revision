@@ -1,6 +1,7 @@
 import { useAppStore, type AppState } from '../lib/store'
+import { useAuthStore } from '../lib/auth-store'
 import { BELT_CONFIG, type Belt, type ProgressionFilter } from '../lib/types'
-import { Target, ChartLineUp, Books, CheckCircle, CaretRight } from '@phosphor-icons/react'
+import { Target, ChartLineUp, Books, CheckCircle, CaretRight, SignOut } from '@phosphor-icons/react'
 import type { Screen } from '../components/BottomNav'
 
 interface Props {
@@ -16,6 +17,8 @@ export function DashboardScreen({ onNavigate, onNavigateProgression }: Props) {
   const getBeltObjectives = useAppStore((s: AppState) => s.getBeltObjectives)
   const getGamePlanTechniques = useAppStore((s: AppState) => s.getGamePlanTechniques)
   const getProgressionTechniques = useAppStore((s: AppState) => s.getProgressionTechniques)
+  const user = useAuthStore(s => s.user)
+  const logout = useAuthStore(s => s.logout)
   const objectives = getBeltObjectives()
   const gamePlanCount = getGamePlanTechniques().length
   const progressionCount = getProgressionTechniques().length
@@ -23,9 +26,17 @@ export function DashboardScreen({ onNavigate, onNavigateProgression }: Props) {
 
   return (
     <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">MasterMind</h1>
-        <p className="text-muted-foreground text-sm">Votre parcours JJB</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">MasterMind</h1>
+          <p className="text-muted-foreground text-sm">Votre parcours JJB</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">{user?.login}</span>
+          <button onClick={logout} className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" title="Se déconnecter">
+            <SignOut size={20} />
+          </button>
+        </div>
       </div>
 
       {/* Belt selector */}

@@ -3,16 +3,17 @@ import { CATEGORY_CONFIG, type Category } from '../lib/types'
 import { useAppStore, type AppState } from '../lib/store'
 import { TechniqueCard } from '../components/TechniqueCard'
 import { AddTechniqueDialog } from '../components/AddTechniqueDialog'
-import { MagnifyingGlass, X, Plus } from '@phosphor-icons/react'
+import { ArrowLeft, MagnifyingGlass, X, Plus } from '@phosphor-icons/react'
 import { Button } from '../components/ui/button'
 
 interface Props {
   onOpenDetail: (id: number) => void
+  onBack: () => void
 }
 
 const CATEGORIES: Category[] = ['defense', 'guard', 'passing', 'submission']
 
-export function LibraryScreen({ onOpenDetail }: Props) {
+export function LibraryScreen({ onOpenDetail, onBack }: Props) {
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<Category | 'all'>('all')
   const userTechniques = useAppStore((s: AppState) => s.userTechniques)
@@ -38,7 +39,12 @@ export function LibraryScreen({ onOpenDetail }: Props) {
   return (
     <div className="max-w-lg mx-auto px-4 py-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Bibliothèque</h1>
+        <div className="flex items-center gap-3">
+          <button onClick={onBack} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <ArrowLeft size={20} weight="bold" />
+          </button>
+          <h1 className="text-xl font-bold">Bibliothèque</h1>
+        </div>
         <Button size="sm" onClick={() => setAddOpen(true)}>
           <Plus weight="bold" className="mr-1" size={16} /> Nouvelle
         </Button>

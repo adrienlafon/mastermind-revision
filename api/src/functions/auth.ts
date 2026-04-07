@@ -9,11 +9,12 @@ app.http('authRegister', {
   route: 'auth/register',
   handler: async (req: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> => {
     try {
-      const body = await req.json() as { login: string; email: string; password: string }
-      const { login, email, password } = body
+      const body = await req.json() as { login: string; email?: string; password: string }
+      const { login, password } = body
+      const email = body.email?.trim() || ''
 
-      if (!login?.trim() || !email?.trim() || !password) {
-        return { status: 400, jsonBody: { error: 'Tous les champs sont obligatoires.' } }
+      if (!login?.trim() || !password) {
+        return { status: 400, jsonBody: { error: 'Pseudo et mot de passe sont obligatoires.' } }
       }
 
       if (password.length < 6) {
@@ -26,19 +27,15 @@ app.http('authRegister', {
       // Check for existing user
       const { resources: existing } = await container.items
         .query({
-          query: 'SELECT * FROM c WHERE LOWER(c.login) = @login OR LOWER(c.email) = @email',
+          query: 'SELECT * FROM c WHERE LOWER(c.login) = @login',
           parameters: [
-            { name: '@login', value: login.toLowerCase() },
-            { name: '@email', value: email.toLowerCase() }
+            { name: '@login', value: login.toLowerCase() }
           ]
         })
         .fetchAll()
 
       if (existing.length > 0) {
-        const conflict = existing[0].login.toLowerCase() === login.toLowerCase() 
-          ? 'Ce nom d\'utilisateur est déjà pris.'
-          : 'Cet email est déjà utilisé.'
-        return { status: 409, jsonBody: { error: conflict } }
+        return { status: 409, jsonBody: { error: 'Ce pseudo est déjà pris.' } }
       }
 
       // Check if first user (becomes owner)
@@ -52,7 +49,7 @@ app.http('authRegister', {
       const user = {
         id: userId,
         login: login.trim(),
-        email: email.trim(),
+        email,
         passwordHash,
         salt,
         isOwner: isFirstUser,
@@ -96,7 +93,7 @@ app.http('authLogin', {
 
       const { resources: users } = await container.items
         .query({
-          query: 'SELECT * FROM c WHERE LOWER(c.login) = @login OR LOWER(c.email) = @login',
+          query: 'SELECT * FROM c WHERE LOWER(c.login) = @login',
           parameters: [{ name: '@login', value: login.toLowerCase() }]
         })
         .fetchAll()

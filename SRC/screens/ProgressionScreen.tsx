@@ -5,18 +5,19 @@ import { TechniqueCard } from '../components/TechniqueCard'
 import { AddTechniqueDialog } from '../components/AddTechniqueDialog'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog'
 import { Button } from '../components/ui/button'
-import { Plus, Trash, CheckCircle, Circle, X } from '@phosphor-icons/react'
+import { ArrowLeft, Plus, Trash, CheckCircle, Circle, X } from '@phosphor-icons/react'
 
 interface Props {
   onOpenDetail: (id: number) => void
   initialFilter?: ProgressionFilter
   onFilterConsumed?: () => void
+  onBack: () => void
 }
 
 const CATEGORIES: Category[] = ['defense', 'guard', 'passing', 'submission']
 const SYSTEM_CATEGORIES: SystemCategory[] = ['guard', 'passing', 'submission']
 
-export function ProgressionScreen({ onOpenDetail, initialFilter, onFilterConsumed }: Props) {
+export function ProgressionScreen({ onOpenDetail, initialFilter, onFilterConsumed, onBack }: Props) {
   const [tab, setTab] = useState<'techniques' | 'systems'>('techniques')
   const [category, setCategory] = useState<Category | 'all'>('all')
   const [masteryFilter, setMasteryFilter] = useState<MasteryLevel | 'all'>('all')
@@ -87,9 +88,14 @@ export function ProgressionScreen({ onOpenDetail, initialFilter, onFilterConsume
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 space-y-4">
       <div className="flex items-center justify-between">
-        <div>
+        <div className="flex items-center gap-3">
+          <button onClick={onBack} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <ArrowLeft size={20} weight="bold" />
+          </button>
+          <div>
           <h1 className="text-xl font-bold">Ma Progression</h1>
           <p className="text-sm text-muted-foreground">{totalInProgress} technique{totalInProgress !== 1 ? 's' : ''} en apprentissage</p>
+          </div>
         </div>
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={() => setAddOpen(true)}>

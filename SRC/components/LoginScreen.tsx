@@ -3,21 +3,17 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Brain, SignIn, UserPlus } from '@phosphor-icons/react'
-import { registerUser, loginUser, type UserInfo } from '@/lib/storage'
+import { Brain, SignIn } from '@phosphor-icons/react'
+import { useAuthStore } from '@/lib/auth-store'
 
-interface LoginScreenProps {
-  onLogin: (user: UserInfo) => void
-}
-
-export function LoginScreen({ onLogin }: LoginScreenProps) {
+export function LoginScreen() {
   const [isRegister, setIsRegister] = useState(false)
   const [login, setLogin] = useState('')
-  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const authLogin = useAuthStore(s => s.login)
+  const authRegister = useAuthStore(s => s.register)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,39 +21,21 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
     setIsSubmitting(true)
 
     try {
+      if (!login.trim() || !password) {
+        setError('Pseudo et mot de passe sont obligatoires.')
+        return
+      }
       if (isRegister) {
-        if (!login.trim() || !email.trim() || !password) {
-          setError('Tous les champs sont obligatoires.')
-          return
-        }
         if (password.length < 6) {
           setError('Le mot de passe doit contenir au moins 6 caractères.')
           return
         }
-        if (password !== confirmPassword) {
-          setError('Les mots de passe ne correspondent pas.')
-          return
-        }
-
-        const result = await registerUser(login.trim(), email.trim(), password)
-        if (result.success && result.user) {
-          onLogin(result.user)
-        } else {
-          setError(result.error ?? 'Erreur lors de l\'inscription.')
-        }
+        await authRegister(login.trim(), password)
       } else {
-        if (!login.trim() || !password) {
-          setError('Veuillez remplir tous les champs.')
-          return
-        }
-
-        const result = await loginUser(login.trim(), password)
-        if (result.success && result.user) {
-          onLogin(result.user)
-        } else {
-          setError(result.error ?? 'Erreur lors de la connexion.')
-        }
+        await authLogin(login.trim(), password)
       }
+    } catch (err: any) {
+      setError(err.message || 'Erreur inattendue.')
     } finally {
       setIsSubmitting(false)
     }
@@ -67,7 +45,6 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
     setIsRegister(!isRegister)
     setError('')
     setPassword('')
-    setConfirmPassword('')
   }
 
   return (
@@ -97,32 +74,16 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="login">
-                  {isRegister ? 'Nom d\'utilisateur' : 'Identifiant ou email'}
-                </Label>
+                <Label htmlFor="login">Pseudo</Label>
                 <Input
                   id="login"
                   type="text"
-                  placeholder={isRegister ? 'MonPseudo' : 'pseudo ou email'}
+                  placeholder="MonPseudo"
                   value={login}
                   onChange={(e) => setLogin(e.target.value)}
-                  autoComplete={isRegister ? 'username' : 'username'}
+                  autoComplete="username"
                 />
               </div>
-
-              {isRegister && (
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="mon@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    autoComplete="email"
-                  />
-                </div>
-              )}
 
               <div className="space-y-2">
                 <Label htmlFor="password">Mot de passe</Label>
@@ -136,20 +97,6 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
                 />
               </div>
 
-              {isRegister && (
-                <div className="space-y-2">
-                  <Label htmlFor="confirm-password">Confirmer le mot de passe</Label>
-                  <Input
-                    id="confirm-password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    autoComplete="new-password"
-                  />
-                </div>
-              )}
-
               {error && (
                 <div className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg p-3">
                   {error}
@@ -157,17 +104,10 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
               )}
 
               <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
-                {isRegister ? (
-                  <>
-                    <UserPlus className="mr-2" weight="bold" />
-                    {isSubmitting ? 'Création...' : 'Créer mon compte'}
-                  </>
-                ) : (
-                  <>
-                    <SignIn className="mr-2" weight="bold" />
-                    {isSubmitting ? 'Connexion...' : 'Se connecter'}
-                  </>
-                )}
+                <SignIn className="mr-2" weight="bold" />
+                {isRegister
+                  ? (isSubmitting ? 'Création...' : 'Créer mon compte')
+                  : (isSubmitting ? 'Connexion...' : 'Se connecter')}
               </Button>
             </form>
 

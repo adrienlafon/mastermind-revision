@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 import { Button } from './ui/button'
-import { CATEGORY_CONFIG, type Category } from '../lib/types'
+import { CATEGORY_CONFIG, MASTERY_CONFIG, type Category, type MasteryLevel } from '../lib/types'
 import { useAppStore, type AppState } from '../lib/store'
 
 interface Props {
@@ -10,26 +10,39 @@ interface Props {
 }
 
 const CATEGORIES: Category[] = ['defense', 'guard', 'passing', 'submission']
+const MASTERY_LEVELS: MasteryLevel[] = ['not_learned', 'in_progress', 'sparring_ok', 'competition_ok']
 
 export function AddTechniqueDialog({ open, onOpenChange }: Props) {
   const addCustomTechnique = useAppStore((s: AppState) => s.addCustomTechnique)
+  const updateMastery = useAppStore((s: AppState) => s.updateMastery)
+  const toggleGamePlan = useAppStore((s: AppState) => s.toggleGamePlan)
   const [name, setName] = useState('')
   const [category, setCategory] = useState<Category>('guard')
   const [description, setDescription] = useState('')
   const [videoUrl, setVideoUrl] = useState('')
+  const [mastery, setMastery] = useState<MasteryLevel>('not_learned')
+  const [inGamePlan, setInGamePlan] = useState(false)
 
   const handleSubmit = () => {
     if (!name.trim()) return
-    addCustomTechnique({
+    const id = addCustomTechnique({
       name: name.trim(),
       category,
       description: description.trim(),
       videoUrl: videoUrl.trim() || undefined,
     })
+    if (mastery !== 'not_learned') {
+      updateMastery(id, mastery)
+    }
+    if (inGamePlan) {
+      toggleGamePlan(id)
+    }
     setName('')
     setCategory('guard')
     setDescription('')
     setVideoUrl('')
+    setMastery('not_learned')
+    setInGamePlan(false)
     onOpenChange(false)
   }
 
@@ -96,6 +109,40 @@ export function AddTechniqueDialog({ open, onOpenChange }: Props) {
               className="w-full mt-1 px-3 py-2.5 rounded-lg border-2 bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
             />
           </div>
+
+          <div>
+            <label className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Niveau de maîtrise</label>
+            <div className="flex gap-2 mt-1 flex-wrap">
+              {MASTERY_LEVELS.map(level => {
+                const config = MASTERY_CONFIG[level]
+                return (
+                  <button
+                    key={level}
+                    type="button"
+                    onClick={() => setMastery(level)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium border-2 transition-colors ${
+                      mastery === level
+                        ? 'text-white border-transparent'
+                        : 'bg-card border-border hover:border-primary/50'
+                    }`}
+                    style={mastery === level ? { backgroundColor: config.color } : undefined}
+                  >
+                    {config.shortLabel} {config.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={inGamePlan}
+              onChange={e => setInGamePlan(e.target.checked)}
+              className="w-4 h-4 rounded border-2 border-border accent-primary"
+            />
+            <span className="text-sm font-medium">Ajouter au Game Plan</span>
+          </label>
 
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1">

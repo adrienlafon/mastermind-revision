@@ -21,6 +21,7 @@ export async function getDatabase(): Promise<Database> {
   await db.containers.createIfNotExists({ id: 'users', partitionKey: '/id' })
   await db.containers.createIfNotExists({ id: 'points', partitionKey: '/id' })
   await db.containers.createIfNotExists({ id: 'progress', partitionKey: '/userId' })
+  await db.containers.createIfNotExists({ id: 'appstate', partitionKey: '/userId' })
 
   database = db
   return db
@@ -36,4 +37,8 @@ export function getPointsContainer(db: Database) {
 
 export function getProgressContainer(db: Database) {
   return db.container('progress')
+}
+
+export function getAppStateContainer(db: Database) {
+  return db.container('appstate')
 }

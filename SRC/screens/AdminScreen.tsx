@@ -1,25 +1,35 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useAppStore, type AppState } from '../lib/store'
 import { TECHNIQUES } from '../lib/techniques'
 import { CATEGORY_CONFIG, MASTERY_CONFIG, BELT_CONFIG, type Category, type Technique, type MasteryLevel, type Belt } from '../lib/types'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog'
 import { Button } from '../components/ui/button'
-import { PencilSimple, Trash, Plus, MagnifyingGlass, Export, X } from '@phosphor-icons/react'
+import { ArrowLeft, PencilSimple, Trash, Plus, MagnifyingGlass, Export, X, Users } from '@phosphor-icons/react'
+import { getUsers, deleteUser, type CloudUser } from '../lib/auth'
 
-type AdminTab = 'techniques' | 'progression' | 'export'
+type AdminTab = 'techniques' | 'progression' | 'users' | 'export'
 
 const CATEGORIES: Category[] = ['defense', 'guard', 'passing', 'submission']
 
-export function AdminScreen() {
+interface AdminProps {
+  onBack: () => void
+}
+
+export function AdminScreen({ onBack }: AdminProps) {
   const [tab, setTab] = useState<AdminTab>('techniques')
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<Category | 'all'>('all')
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 space-y-4">
-      <div>
-        <h1 className="text-xl font-bold">Administration</h1>
-        <p className="text-sm text-muted-foreground">Gérer les techniques et voir la progression</p>
+      <div className="flex items-center gap-3">
+        <button onClick={onBack} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+          <ArrowLeft size={20} weight="bold" />
+        </button>
+        <div>
+          <h1 className="text-xl font-bold">Administration</h1>
+          <p className="text-sm text-muted-foreground">Gérer les techniques et voir la progression</p>
+        </div>
       </div>
 
       {/* Tabs */}
@@ -27,6 +37,7 @@ export function AdminScreen() {
         {([
           { key: 'techniques' as AdminTab, label: 'Techniques' },
           { key: 'progression' as AdminTab, label: 'Progression' },
+          { key: 'users' as AdminTab, label: 'Utilisateurs' },
           { key: 'export' as AdminTab, label: 'Export / Import' },
         ]).map(t => (
           <button
@@ -43,6 +54,7 @@ export function AdminScreen() {
 
       {tab === 'techniques' && <TechniquesTab search={search} setSearch={setSearch} categoryFilter={categoryFilter} setCategoryFilter={setCategoryFilter} />}
       {tab === 'progression' && <ProgressionTab />}
+      {tab === 'users' && <UsersTab />}
       {tab === 'export' && <ExportTab />}
     </div>
   )
@@ -501,6 +513,90 @@ function StatCard({ label, value }: { label: string; value: string }) {
     <div className="bg-card rounded-xl border-2 border-border p-4 text-center">
       <p className="text-2xl font-bold">{value}</p>
       <p className="text-xs text-muted-foreground mt-1">{label}</p>
+    </div>
+  )
+}
+
+// ─── Users Tab ───────────────────────────────────────────────
+
+function UsersTab() {
+  const [users, setUsers] = useState<CloudUser[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const loadUsers = async () => {
+    setLoading(true)
+    const data = await getUsers()
+    setUsers(data)
+    setLoading(false)
+  }
+
+  useEffect(() => { loadUsers() }, [])
+
+  const handleDelete = async (user: CloudUser) => {
+    if (!confirm(`Supprimer l'utilisateur "${user.login}" ? Cette action est irréversible.`)) return
+    const ok = await deleteUser(user.id)
+    if (ok) setUsers(prev => prev.filter(u => u.id !== user.id))
+  }
+
+  if (loading) {
+    return <p className="text-sm text-muted-foreground py-8 text-center">Chargement des utilisateurs...</p>
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+          {users.length} utilisateur{users.length !== 1 ? 's' : ''}
+        </h3>
+        <Button variant="outline" size="sm" onClick={loadUsers}>Rafraîchir</Button>
+      </div>
+
+      <div className="rounded-xl border-2 border-border overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-muted/50 border-b border-border">
+                <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Login</th>
+                <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Email</th>
+                <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Inscrit le</th>
+                <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Rôle</th>
+                <th className="text-right px-4 py-3 font-semibold text-muted-foreground">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map(u => (
+                <tr key={u.id} className="border-b border-border/50">
+                  <td className="px-4 py-2.5 font-medium">{u.login}</td>
+                  <td className="px-4 py-2.5 text-muted-foreground">{u.email}</td>
+                  <td className="px-4 py-2.5 text-muted-foreground text-xs">
+                    {new Date(u.createdAt).toLocaleDateString('fr-FR')}
+                  </td>
+                  <td className="px-4 py-2.5">
+                    {u.isOwner ? (
+                      <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400">Admin</span>
+                    ) : (
+                      <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-muted text-muted-foreground">User</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-2.5 text-right">
+                    {!u.isOwner && (
+                      <button
+                        onClick={() => handleDelete(u)}
+                        className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                      >
+                        <Trash size={16} />
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {users.length === 0 && (
+          <p className="text-center text-muted-foreground py-8">Aucun utilisateur trouvé.</p>
+        )}
+      </div>
     </div>
   )
 }

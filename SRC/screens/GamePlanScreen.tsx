@@ -4,13 +4,14 @@ import { CATEGORY_CONFIG, MASTERY_CONFIG, type TechniqueWithProgress } from '../
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog'
 import { Button } from '../components/ui/button'
 import { AddTechniqueDialog } from '../components/AddTechniqueDialog'
-import { DotsSixVertical, Plus, Trash } from '@phosphor-icons/react'
+import { ArrowLeft, DotsSixVertical, Plus, Trash } from '@phosphor-icons/react'
 
 interface Props {
   onOpenDetail: (id: number) => void
+  onBack: () => void
 }
 
-export function GamePlanScreen({ onOpenDetail }: Props) {
+export function GamePlanScreen({ onOpenDetail, onBack }: Props) {
   const getGamePlanTechniques = useAppStore((s: AppState) => s.getGamePlanTechniques)
   const getProgressionTechniques = useAppStore((s: AppState) => s.getProgressionTechniques)
   const toggleGamePlan = useAppStore((s: AppState) => s.toggleGamePlan)
@@ -38,11 +39,16 @@ export function GamePlanScreen({ onOpenDetail }: Props) {
   return (
     <div className="max-w-lg mx-auto px-4 py-6 space-y-4">
       <div className="flex items-center justify-between">
-        <div>
+        <div className="flex items-center gap-3">
+          <button onClick={onBack} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <ArrowLeft size={20} weight="bold" />
+          </button>
+          <div>
           <h1 className="text-xl font-bold">Mon Game Plan</h1>
           <p className="text-sm text-muted-foreground">
             {gamePlanTechniques.length} technique{gamePlanTechniques.length !== 1 ? 's' : ''}
           </p>
+          </div>
         </div>
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={() => setAddTechniqueOpen(true)}>

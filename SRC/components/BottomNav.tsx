@@ -1,4 +1,5 @@
 import { House, Target, ChartLineUp, Books, GearSix } from '@phosphor-icons/react'
+import { useAuthStore } from '@/lib/auth-store'
 
 export type Screen = 'dashboard' | 'gameplan' | 'progression' | 'library' | 'admin'
 
@@ -7,19 +8,22 @@ interface BottomNavProps {
   onChange: (screen: Screen) => void
 }
 
-const NAV_ITEMS: { key: Screen; label: string; Icon: typeof House }[] = [
+const NAV_ITEMS: { key: Screen; label: string; Icon: typeof House; adminOnly?: boolean }[] = [
   { key: 'dashboard', label: 'Accueil', Icon: House },
   { key: 'gameplan', label: 'Game Plan', Icon: Target },
   { key: 'progression', label: 'Progression', Icon: ChartLineUp },
   { key: 'library', label: 'Bibliothèque', Icon: Books },
-  { key: 'admin', label: 'Admin', Icon: GearSix },
+  { key: 'admin', label: 'Admin', Icon: GearSix, adminOnly: true },
 ]
 
 export function BottomNav({ active, onChange }: BottomNavProps) {
+  const user = useAuthStore(s => s.user)
+  const items = NAV_ITEMS.filter(item => !item.adminOnly || user?.isOwner)
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 safe-area-bottom">
       <div className="flex justify-around items-center h-16 max-w-lg mx-auto">
-        {NAV_ITEMS.map(({ key, label, Icon }) => (
+        {items.map(({ key, label, Icon }) => (
           <button
             key={key}
             onClick={() => onChange(key)}
