@@ -3,6 +3,7 @@ import { useAppStore, type AppState } from '../lib/store'
 import { CATEGORY_CONFIG, MASTERY_CONFIG, type TechniqueWithProgress } from '../lib/types'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog'
 import { Button } from '../components/ui/button'
+import { AddTechniqueDialog } from '../components/AddTechniqueDialog'
 import { DotsSixVertical, Plus, Trash } from '@phosphor-icons/react'
 
 interface Props {
@@ -17,6 +18,7 @@ export function GamePlanScreen({ onOpenDetail }: Props) {
   const userTechniques = useAppStore((s: AppState) => s.userTechniques)
 
   const [addDialogOpen, setAddDialogOpen] = useState(false)
+  const [addTechniqueOpen, setAddTechniqueOpen] = useState(false)
   const [dragIndex, setDragIndex] = useState<number | null>(null)
 
   const gamePlanTechniques: TechniqueWithProgress[] = getGamePlanTechniques()
@@ -42,9 +44,14 @@ export function GamePlanScreen({ onOpenDetail }: Props) {
             {gamePlanTechniques.length} technique{gamePlanTechniques.length !== 1 ? 's' : ''}
           </p>
         </div>
-        <Button size="sm" onClick={() => setAddDialogOpen(true)}>
-          <Plus weight="bold" className="mr-1" size={16} /> Ajouter
-        </Button>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={() => setAddTechniqueOpen(true)}>
+            <Plus weight="bold" className="mr-1" size={16} /> Nouvelle
+          </Button>
+          <Button size="sm" onClick={() => setAddDialogOpen(true)}>
+            <Plus weight="bold" className="mr-1" size={16} /> Ajouter
+          </Button>
+        </div>
       </div>
 
       {gamePlanTechniques.length === 0 ? (
@@ -153,6 +160,8 @@ export function GamePlanScreen({ onOpenDetail }: Props) {
           )}
         </DialogContent>
       </Dialog>
+
+      <AddTechniqueDialog open={addTechniqueOpen} onOpenChange={setAddTechniqueOpen} />
     </div>
   )
 }

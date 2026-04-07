@@ -2,6 +2,9 @@ import { useState, useMemo } from 'react'
 import { useAppStore, type AppState } from '../lib/store'
 import { CATEGORY_CONFIG, MASTERY_CONFIG, type Category, type MasteryLevel, type TechniqueWithProgress } from '../lib/types'
 import { TechniqueCard } from '../components/TechniqueCard'
+import { AddTechniqueDialog } from '../components/AddTechniqueDialog'
+import { Button } from '../components/ui/button'
+import { Plus } from '@phosphor-icons/react'
 
 interface Props {
   onOpenDetail: (id: number) => void
@@ -14,6 +17,7 @@ export function ProgressionScreen({ onOpenDetail }: Props) {
   const [masteryFilter, setMasteryFilter] = useState<MasteryLevel | 'all'>('all')
   const userTechniques = useAppStore((s: AppState) => s.userTechniques)
   const getProgressionTechniques = useAppStore((s: AppState) => s.getProgressionTechniques)
+  const [addOpen, setAddOpen] = useState(false)
 
   const techniques = useMemo(() => {
     let all: TechniqueWithProgress[] = getProgressionTechniques()
@@ -30,9 +34,14 @@ export function ProgressionScreen({ onOpenDetail }: Props) {
 
   return (
     <div className="max-w-lg mx-auto px-4 py-6 space-y-4">
-      <div>
-        <h1 className="text-xl font-bold">Ma Progression</h1>
-        <p className="text-sm text-muted-foreground">{totalInProgress} technique{totalInProgress !== 1 ? 's' : ''} en apprentissage</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold">Ma Progression</h1>
+          <p className="text-sm text-muted-foreground">{totalInProgress} technique{totalInProgress !== 1 ? 's' : ''} en apprentissage</p>
+        </div>
+        <Button size="sm" onClick={() => setAddOpen(true)}>
+          <Plus weight="bold" className="mr-1" size={16} /> Nouvelle
+        </Button>
       </div>
 
       {/* Category tabs */}
@@ -118,6 +127,8 @@ export function ProgressionScreen({ onOpenDetail }: Props) {
           </p>
         </div>
       )}
+
+      <AddTechniqueDialog open={addOpen} onOpenChange={setAddOpen} />
     </div>
   )
 }

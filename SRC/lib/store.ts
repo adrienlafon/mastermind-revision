@@ -1,19 +1,23 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { UserTechnique, MasteryLevel, TechniqueWithProgress, Category } from './types';
+import { Technique, UserTechnique, MasteryLevel, TechniqueWithProgress, Category } from './types';
 import { TECHNIQUES } from './techniques';
 
 export interface AppState {
   // User technique progress
   userTechniques: Record<number, UserTechnique>;
+  // Custom techniques added by the user
+  customTechniques: Technique[];
   
   // Actions
   updateMastery: (techniqueId: number, level: MasteryLevel) => void;
   updateNotes: (techniqueId: number, notes: string) => void;
   toggleGamePlan: (techniqueId: number) => void;
   reorderGamePlan: (fromIndex: number, toIndex: number) => void;
+  addCustomTechnique: (technique: Omit<Technique, 'id'>) => number;
   
   // Computed selectors
+  getAllTechniques: () => Technique[];
   getTechniqueWithProgress: (techniqueId: number) => TechniqueWithProgress | undefined;
   getAllTechniquesWithProgress: () => TechniqueWithProgress[];
   getProgressionTechniques: () => TechniqueWithProgress[];
@@ -33,6 +37,7 @@ export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
       userTechniques: {},
+      customTechniques: [],
 
       updateMastery: (techniqueId, level) => {
         set((state) => ({
@@ -96,8 +101,22 @@ export const useAppStore = create<AppState>()(
         set({ userTechniques: updatedTechniques });
       },
 
+      addCustomTechnique: (technique) => {
+        const state = get();
+        const allTechniques = [...TECHNIQUES, ...state.customTechniques];
+        const maxId = allTechniques.reduce((max, t) => Math.max(max, t.id), 0);
+        const newId = maxId + 1;
+        set({ customTechniques: [...state.customTechniques, { ...technique, id: newId }] });
+        return newId;
+      },
+
+      getAllTechniques: () => {
+        return [...TECHNIQUES, ...get().customTechniques];
+      },
+
       getTechniqueWithProgress: (techniqueId) => {
-        const technique = TECHNIQUES.find(t => t.id === techniqueId);
+        const allTechniques = [...TECHNIQUES, ...get().customTechniques];
+        const technique = allTechniques.find(t => t.id === techniqueId);
         if (!technique) return undefined;
 
         const userTechnique = get().userTechniques[techniqueId] || getInitialUserTechnique(techniqueId);
@@ -113,7 +132,8 @@ export const useAppStore = create<AppState>()(
 
       getAllTechniquesWithProgress: () => {
         const state = get();
-        return TECHNIQUES.map(technique => {
+        const allTechniques = [...TECHNIQUES, ...state.customTechniques];
+        return allTechniques.map(technique => {
           const userTechnique = state.userTechniques[technique.id] || getInitialUserTechnique(technique.id);
           return {
             ...technique,

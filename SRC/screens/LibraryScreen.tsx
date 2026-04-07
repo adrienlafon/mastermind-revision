@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react'
-import { TECHNIQUES } from '../lib/techniques'
 import { CATEGORY_CONFIG, type Category } from '../lib/types'
 import { useAppStore, type AppState } from '../lib/store'
 import { TechniqueCard } from '../components/TechniqueCard'
-import { MagnifyingGlass, X } from '@phosphor-icons/react'
+import { AddTechniqueDialog } from '../components/AddTechniqueDialog'
+import { MagnifyingGlass, X, Plus } from '@phosphor-icons/react'
+import { Button } from '../components/ui/button'
 
 interface Props {
   onOpenDetail: (id: number) => void
@@ -15,9 +16,13 @@ export function LibraryScreen({ onOpenDetail }: Props) {
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<Category | 'all'>('all')
   const userTechniques = useAppStore((s: AppState) => s.userTechniques)
+  const getAllTechniques = useAppStore((s: AppState) => s.getAllTechniques)
+  const [addOpen, setAddOpen] = useState(false)
+
+  const allTechniques = getAllTechniques()
 
   const filtered = useMemo(() => {
-    let result = TECHNIQUES
+    let result = allTechniques
     if (categoryFilter !== 'all') {
       result = result.filter(t => t.category === categoryFilter)
     }
@@ -28,11 +33,16 @@ export function LibraryScreen({ onOpenDetail }: Props) {
       )
     }
     return result
-  }, [search, categoryFilter])
+  }, [search, categoryFilter, allTechniques])
 
   return (
     <div className="max-w-lg mx-auto px-4 py-6 space-y-4">
-      <h1 className="text-xl font-bold">Bibliothèque</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold">Bibliothèque</h1>
+        <Button size="sm" onClick={() => setAddOpen(true)}>
+          <Plus weight="bold" className="mr-1" size={16} /> Nouvelle
+        </Button>
+      </div>
 
       {/* Search */}
       <div className="relative">
@@ -64,11 +74,11 @@ export function LibraryScreen({ onOpenDetail }: Props) {
               : 'bg-card border-border hover:border-primary/50'
           }`}
         >
-          Tous ({TECHNIQUES.length})
+          Tous ({allTechniques.length})
         </button>
         {CATEGORIES.map(cat => {
           const config = CATEGORY_CONFIG[cat]
-          const count = TECHNIQUES.filter(t => t.category === cat).length
+          const count = allTechniques.filter(t => t.category === cat).length
           return (
             <button
               key={cat}
@@ -105,6 +115,8 @@ export function LibraryScreen({ onOpenDetail }: Props) {
       {filtered.length === 0 && (
         <p className="text-center text-muted-foreground py-8">Aucune technique trouvée.</p>
       )}
+
+      <AddTechniqueDialog open={addOpen} onOpenChange={setAddOpen} />
     </div>
   )
 }

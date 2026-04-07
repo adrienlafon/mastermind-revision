@@ -1,6 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 import { Button } from './ui/button'
-import { TECHNIQUES } from '../lib/techniques'
 import { CATEGORY_CONFIG } from '../lib/types'
 import { useAppStore, type AppState } from '../lib/store'
 import { MasterySelector } from './MasterySelector'
@@ -12,7 +11,8 @@ interface Props {
 }
 
 export function TechniqueDetailDialog({ techniqueId, open, onOpenChange }: Props) {
-  const technique = TECHNIQUES.find(t => t.id === techniqueId)
+  const getAllTechniques = useAppStore((s: AppState) => s.getAllTechniques)
+  const technique = getAllTechniques().find(t => t.id === techniqueId)
   const userTechniques = useAppStore((s: AppState) => s.userTechniques)
   const updateMastery = useAppStore((s: AppState) => s.updateMastery)
   const updateNotes = useAppStore((s: AppState) => s.updateNotes)
@@ -73,12 +73,26 @@ export function TechniqueDetailDialog({ techniqueId, open, onOpenChange }: Props
             />
           </div>
 
-          <Button
+          <label
+            className="flex items-center gap-3 cursor-pointer select-none"
             onClick={() => toggleGamePlan(technique.id)}
-            variant={inGamePlan ? 'destructive' : 'default'}
+          >
+            <input
+              type="checkbox"
+              checked={inGamePlan}
+              onChange={() => toggleGamePlan(technique.id)}
+              className="w-5 h-5 rounded accent-primary cursor-pointer"
+              onClick={e => e.stopPropagation()}
+            />
+            <span className="text-sm font-medium">Dans mon Game Plan</span>
+          </label>
+
+          <Button
+            onClick={() => onOpenChange(false)}
+            variant="outline"
             className="w-full"
           >
-            {inGamePlan ? 'Retirer du Game Plan' : 'Ajouter au Game Plan'}
+            Fermer
           </Button>
         </div>
       </DialogContent>
