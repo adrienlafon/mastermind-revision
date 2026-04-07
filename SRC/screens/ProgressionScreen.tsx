@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useAppStore, type AppState } from '../lib/store'
-import { CATEGORY_CONFIG, MASTERY_CONFIG, SYSTEM_CATEGORY_CONFIG, type Category, type MasteryLevel, type TechniqueWithProgress, type SystemCategory } from '../lib/types'
+import { CATEGORY_CONFIG, MASTERY_CONFIG, SYSTEM_CATEGORY_CONFIG, type Category, type MasteryLevel, type TechniqueWithProgress, type SystemCategory, type ProgressionFilter } from '../lib/types'
 import { TechniqueCard } from '../components/TechniqueCard'
 import { AddTechniqueDialog } from '../components/AddTechniqueDialog'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog'
@@ -9,15 +9,30 @@ import { Plus, Trash, CheckCircle, Circle, X } from '@phosphor-icons/react'
 
 interface Props {
   onOpenDetail: (id: number) => void
+  initialFilter?: ProgressionFilter
+  onFilterConsumed?: () => void
 }
 
 const CATEGORIES: Category[] = ['defense', 'guard', 'passing', 'submission']
 const SYSTEM_CATEGORIES: SystemCategory[] = ['guard', 'passing', 'submission']
 
-export function ProgressionScreen({ onOpenDetail }: Props) {
+export function ProgressionScreen({ onOpenDetail, initialFilter, onFilterConsumed }: Props) {
   const [tab, setTab] = useState<'techniques' | 'systems'>('techniques')
   const [category, setCategory] = useState<Category | 'all'>('all')
   const [masteryFilter, setMasteryFilter] = useState<MasteryLevel | 'all'>('all')
+
+  // Apply initial filter from navigation
+  useEffect(() => {
+    if (initialFilter) {
+      if (initialFilter.tab === 'techniques') {
+        setTab('techniques')
+        setCategory(initialFilter.category)
+      } else if (initialFilter.tab === 'systems') {
+        setTab('systems')
+      }
+      onFilterConsumed?.()
+    }
+  }, [initialFilter])
   const userTechniques = useAppStore((s: AppState) => s.userTechniques)
   const getProgressionTechniques = useAppStore((s: AppState) => s.getProgressionTechniques)
   const getAllTechniquesWithProgress = useAppStore((s: AppState) => s.getAllTechniquesWithProgress)
@@ -70,7 +85,7 @@ export function ProgressionScreen({ onOpenDetail }: Props) {
     : []
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-6 space-y-4">
+    <div className="max-w-5xl mx-auto px-4 py-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold">Ma Progression</h1>
@@ -86,8 +101,8 @@ export function ProgressionScreen({ onOpenDetail }: Props) {
         </div>
       </div>
 
-      {/* Tab toggle: Techniques / Systèmes */}
-      <div className="flex rounded-lg border-2 border-border overflow-hidden">
+      {/* Mobile tab toggle */}
+      <div className="flex rounded-lg border-2 border-border overflow-hidden md:hidden">
         <button
           onClick={() => setTab('techniques')}
           className={`flex-1 py-2 text-sm font-medium transition-colors ${
@@ -102,14 +117,109 @@ export function ProgressionScreen({ onOpenDetail }: Props) {
             tab === 'systems' ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground hover:text-foreground'
           }`}
         >
-          Mes Systèmes ({systems.length})
+          Systèmes ({systems.length})
         </button>
       </div>
 
-      {tab === 'techniques' && (
-        <>
+      {/* Two-column layout on desktop, tabs on mobile */}
+      <div className="flex flex-col md:flex-row gap-6">
+
+        {/* Left column: Systems */}
+        <div className={`md:w-[340px] md:shrink-0 space-y-3 ${tab !== 'systems' ? 'hidden md:block' : ''}`}>
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Mes Systèmes</h2>
+            <button
+              onClick={() => setCreateSystemOpen(true)}
+              className="text-primary hover:text-primary/80 transition-colors"
+            >
+              <Plus weight="bold" size={20} />
+            </button>
+          </div>
+
+          {systems.length === 0 ? (
+            <div className="text-center py-8 bg-card rounded-xl border-2 border-dashed border-border">
+              <div className="text-3xl mb-2">🔗</div>
+              <p className="text-sm text-muted-foreground">Aucun système créé</p>
+              <Button size="sm" variant="outline" className="mt-3" onClick={() => setCreateSystemOpen(true)}>
+                <Plus weight="bold" className="mr-1" size={14} /> Créer un système
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {systems.map(system => {
+                const catConfig = SYSTEM_CATEGORY_CONFIG[system.category]
+                const systemTechniques = system.techniqueIds.map(id => allTechniques.find(t => t.id === id)).filter(Boolean)
+                return (
+                  <div key={system.id} className={`rounded-xl border-2 overflow-hidden ${system.validated ? 'border-green-500/50 bg-green-500/5' : 'border-border bg-card'}`}>
+                    <div className="p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          {system.validated ? (
+                            <CheckCircle size={18} weight="fill" className="text-green-500 shrink-0" />
+                          ) : (
+                            <Circle size={18} className="text-muted-foreground shrink-0" />
+                          )}
+                          <h3 className="font-semibold text-sm truncate">{system.name}</h3>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <span
+                            className="text-[10px] font-medium px-1.5 py-0.5 rounded text-white"
+                            style={{ backgroundColor: catConfig.color }}
+                          >
+                            {catConfig.icon}
+                          </span>
+                          {!system.validated && (
+                            <button
+                              onClick={() => deleteSystem(system.id)}
+                              className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                            >
+                              <Trash size={14} />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {systemTechniques.length === 0 ? (
+                        <p className="text-xs text-muted-foreground py-1">Aucune technique</p>
+                      ) : (
+                        <div className="space-y-1 mb-2">
+                          {systemTechniques.map(t => t && (
+                            <div key={t.id} className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-background/50 border border-border/50">
+                              <p className="text-xs flex-1 truncate cursor-pointer hover:text-primary" onClick={() => onOpenDetail(t.id)}>{t.name}</p>
+                              {!system.validated && (
+                                <button onClick={() => removeTechniqueFromSystem(system.id, t.id)} className="text-muted-foreground hover:text-destructive shrink-0">
+                                  <X size={12} />
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {!system.validated ? (
+                        <div className="flex gap-1.5">
+                          <Button size="sm" variant="outline" onClick={() => setAddToSystemId(system.id)} className="flex-1 text-xs h-8">
+                            <Plus weight="bold" className="mr-1" size={12} /> Technique
+                          </Button>
+                          <Button size="sm" onClick={() => validateSystem(system.id)} disabled={systemTechniques.length === 0} className="flex-1 text-xs h-8">
+                            ✓ Valider
+                          </Button>
+                        </div>
+                      ) : (
+                        <p className="text-xs text-green-500 font-medium">✓ Système validé</p>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Right column: Techniques */}
+        <div className={`flex-1 space-y-4 ${tab !== 'techniques' ? 'hidden md:block' : ''}`}>
           {/* Category tabs */}
-          <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4">
+          <div className="flex gap-2 overflow-x-auto pb-1">
             <button
               onClick={() => setCategory('all')}
               className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border-2 transition-colors ${
@@ -140,7 +250,7 @@ export function ProgressionScreen({ onOpenDetail }: Props) {
           </div>
 
           {/* Mastery filter */}
-          <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4">
+          <div className="flex gap-2 overflow-x-auto pb-1">
             <button
               onClick={() => setMasteryFilter('all')}
               className={`shrink-0 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors ${
@@ -191,113 +301,8 @@ export function ProgressionScreen({ onOpenDetail }: Props) {
               </p>
             </div>
           )}
-        </>
-      )}
-
-      {tab === 'systems' && (
-        <>
-          <Button onClick={() => setCreateSystemOpen(true)} className="w-full">
-            <Plus weight="bold" className="mr-1" size={16} /> Créer un système
-          </Button>
-
-          {systems.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-4xl mb-4">🔗</div>
-              <p className="text-muted-foreground font-medium">Aucun système créé.</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Créez un système de garde, passage ou soumission et ajoutez-y des techniques.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {systems.map(system => {
-                const catConfig = SYSTEM_CATEGORY_CONFIG[system.category]
-                const systemTechniques = system.techniqueIds.map(id => allTechniques.find(t => t.id === id)).filter(Boolean)
-                return (
-                  <div key={system.id} className={`rounded-xl border-2 overflow-hidden ${system.validated ? 'border-green-500/50 bg-green-500/5' : 'border-border bg-card'}`}>
-                    <div className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          {system.validated ? (
-                            <CheckCircle size={20} weight="fill" className="text-green-500" />
-                          ) : (
-                            <Circle size={20} className="text-muted-foreground" />
-                          )}
-                          <h3 className="font-semibold">{system.name}</h3>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <span
-                            className="text-[10px] font-medium px-1.5 py-0.5 rounded text-white"
-                            style={{ backgroundColor: catConfig.color }}
-                          >
-                            {catConfig.icon} {catConfig.label}
-                          </span>
-                          {!system.validated && (
-                            <button
-                              onClick={() => deleteSystem(system.id)}
-                              className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-                            >
-                              <Trash size={16} />
-                            </button>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Techniques in this system */}
-                      {systemTechniques.length === 0 ? (
-                        <p className="text-xs text-muted-foreground py-2">Aucune technique dans ce système.</p>
-                      ) : (
-                        <div className="space-y-1.5 mb-3">
-                          {systemTechniques.map(t => t && (
-                            <div key={t.id} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-background/50 border border-border/50">
-                              <p className="text-sm flex-1 truncate cursor-pointer hover:text-primary" onClick={() => onOpenDetail(t.id)}>{t.name}</p>
-                              {!system.validated && (
-                                <button
-                                  onClick={() => removeTechniqueFromSystem(system.id, t.id)}
-                                  className="text-muted-foreground hover:text-destructive"
-                                >
-                                  <X size={14} />
-                                </button>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Actions */}
-                      <div className="flex gap-2">
-                        {!system.validated && (
-                          <>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => setAddToSystemId(system.id)}
-                              className="flex-1"
-                            >
-                              <Plus weight="bold" className="mr-1" size={14} /> Technique
-                            </Button>
-                            <Button
-                              size="sm"
-                              onClick={() => validateSystem(system.id)}
-                              disabled={systemTechniques.length === 0}
-                              className="flex-1"
-                            >
-                              ✓ Valider mon système
-                            </Button>
-                          </>
-                        )}
-                        {system.validated && (
-                          <p className="text-sm text-green-500 font-medium">✓ Système validé</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </>
-      )}
+        </div>
+      </div>
 
       <AddTechniqueDialog open={addOpen} onOpenChange={setAddOpen} />
 

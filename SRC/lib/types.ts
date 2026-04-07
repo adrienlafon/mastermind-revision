@@ -78,3 +78,9 @@ export const SYSTEM_CATEGORY_CONFIG: Record<SystemCategory, CategoryConfig> = {
   passing: CATEGORY_CONFIG.passing,
   submission: CATEGORY_CONFIG.submission,
 };
+
+// Filter for navigation from objectives
+export type ProgressionFilter = 
+  | { tab: 'techniques'; category: Category }
+  | { tab: 'systems' }
+  | null;

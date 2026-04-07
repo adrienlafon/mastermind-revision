@@ -6,10 +6,17 @@ import { GamePlanScreen } from '@/screens/GamePlanScreen'
 import { ProgressionScreen } from '@/screens/ProgressionScreen'
 import { LibraryScreen } from '@/screens/LibraryScreen'
 import { Toaster } from '@/components/ui/sonner'
+import type { ProgressionFilter } from '@/lib/types'
 
 function App() {
   const [screen, setScreen] = useState<Screen>('dashboard')
   const [detailId, setDetailId] = useState<number | null>(null)
+  const [progressionFilter, setProgressionFilter] = useState<ProgressionFilter>(null)
+
+  const navigateToProgression = (filter: ProgressionFilter) => {
+    setProgressionFilter(filter)
+    setScreen('progression')
+  }
 
   // Default to dark theme
   useEffect(() => {
@@ -22,13 +29,13 @@ function App() {
   return (
     <div className="min-h-screen bg-background pb-20">
       {screen === 'dashboard' && (
-        <DashboardScreen onNavigate={setScreen} />
+        <DashboardScreen onNavigate={setScreen} onNavigateProgression={navigateToProgression} />
       )}
       {screen === 'gameplan' && (
         <GamePlanScreen onOpenDetail={setDetailId} />
       )}
       {screen === 'progression' && (
-        <ProgressionScreen onOpenDetail={setDetailId} />
+        <ProgressionScreen onOpenDetail={setDetailId} initialFilter={progressionFilter} onFilterConsumed={() => setProgressionFilter(null)} />
       )}
       {screen === 'library' && (
         <LibraryScreen onOpenDetail={setDetailId} />

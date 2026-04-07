@@ -1,15 +1,16 @@
 import { useAppStore, type AppState } from '../lib/store'
-import { BELT_CONFIG, type Belt } from '../lib/types'
-import { Target, ChartLineUp, Books, CheckCircle, Circle } from '@phosphor-icons/react'
+import { BELT_CONFIG, type Belt, type ProgressionFilter } from '../lib/types'
+import { Target, ChartLineUp, Books, CheckCircle, CaretRight } from '@phosphor-icons/react'
 import type { Screen } from '../components/BottomNav'
 
 interface Props {
   onNavigate: (screen: Screen) => void
+  onNavigateProgression: (filter: ProgressionFilter) => void
 }
 
 const BELTS: Belt[] = ['white', 'blue', 'purple', 'brown', 'black']
 
-export function DashboardScreen({ onNavigate }: Props) {
+export function DashboardScreen({ onNavigate, onNavigateProgression }: Props) {
   const belt = useAppStore((s: AppState) => s.belt)
   const setBelt = useAppStore((s: AppState) => s.setBelt)
   const getBeltObjectives = useAppStore((s: AppState) => s.getBeltObjectives)
@@ -52,32 +53,47 @@ export function DashboardScreen({ onNavigate }: Props) {
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
             Objectifs ceinture {BELT_CONFIG[belt].label.toLowerCase()}
           </h2>
-          <span className="text-xs font-medium text-primary">
+          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
             {completedCount}/{objectives.length}
           </span>
         </div>
+
+        {/* Overall progress bar */}
+        <div className="w-full h-2 bg-muted rounded-full overflow-hidden mb-4">
+          <div
+            className="h-full rounded-full bg-primary transition-all duration-500"
+            style={{ width: `${objectives.length > 0 ? Math.round((completedCount / objectives.length) * 100) : 0}%` }}
+          />
+        </div>
+
         <div className="space-y-2">
           {objectives.map((obj, i) => (
-            <div
+            <button
               key={i}
-              className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-colors ${
+              onClick={() => onNavigateProgression(obj.filter)}
+              className={`w-full flex items-center gap-3 p-4 rounded-xl border transition-all text-left active:scale-[0.98] ${
                 obj.completed
-                  ? 'bg-green-500/10 border-green-500/30'
-                  : 'bg-card border-border'
+                  ? 'bg-green-500/5 border-green-500/20 hover:border-green-500/40'
+                  : 'bg-card border-border hover:border-primary/40'
               }`}
             >
-              {obj.completed ? (
-                <CheckCircle size={24} weight="fill" className="text-green-500 shrink-0" />
-              ) : (
-                <Circle size={24} className="text-muted-foreground shrink-0" />
-              )}
+              <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${
+                obj.completed ? 'bg-green-500/20' : 'bg-muted'
+              }`}>
+                {obj.completed ? (
+                  <CheckCircle size={20} weight="fill" className="text-green-500" />
+                ) : (
+                  <span className="text-xs font-bold text-muted-foreground">{i + 1}</span>
+                )}
+              </div>
               <div className="flex-1 min-w-0">
-                <p className={`text-sm font-semibold ${obj.completed ? 'text-green-500' : ''}`}>
+                <p className={`text-sm font-semibold ${obj.completed ? 'text-green-400' : 'text-foreground'}`}>
                   {obj.label}
                 </p>
-                <p className="text-xs text-muted-foreground">{obj.description}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{obj.description}</p>
               </div>
-            </div>
+              <CaretRight size={16} className="text-muted-foreground shrink-0" />
+            </button>
           ))}
         </div>
       </div>

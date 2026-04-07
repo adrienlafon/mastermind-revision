@@ -1,12 +1,13 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { Technique, UserTechnique, MasteryLevel, TechniqueWithProgress, Category, Belt, TechniqueSystem, SystemCategory } from './types';
+import { Technique, UserTechnique, MasteryLevel, TechniqueWithProgress, Category, Belt, TechniqueSystem, SystemCategory, ProgressionFilter } from './types';
 import { TECHNIQUES } from './techniques';
 
 export interface BeltObjectiveStatus {
   label: string;
   description: string;
   completed: boolean;
+  filter: ProgressionFilter;
 }
 
 export interface AppState {
@@ -248,116 +249,48 @@ export const useAppStore = create<AppState>()(
           t => t.masteryLevel === 'sparring_ok' || t.masteryLevel === 'competition_ok'
         ).length;
 
-        const guardSystems = state.systems.filter(s => s.category === 'guard');
-        const passingSystems = state.systems.filter(s => s.category === 'passing');
-        const submissionSystems = state.systems.filter(s => s.category === 'submission');
+        const validatedGuard = state.systems.filter(s => s.category === 'guard' && s.validated).length;
+        const validatedPassing = state.systems.filter(s => s.category === 'passing' && s.validated).length;
+        const validatedSubmission = state.systems.filter(s => s.category === 'submission' && s.validated).length;
 
-        const validatedGuard = guardSystems.filter(s => s.validated).length;
-        const validatedPassing = passingSystems.filter(s => s.validated).length;
-        const validatedSubmission = submissionSystems.filter(s => s.validated).length;
+        const beltRequirements: Record<Belt, { guard: number; passing: number; submission: number }> = {
+          white: { guard: 1, passing: 1, submission: 0 },
+          blue: { guard: 2, passing: 2, submission: 1 },
+          purple: { guard: 3, passing: 3, submission: 2 },
+          brown: { guard: 4, passing: 4, submission: 3 },
+          black: { guard: 5, passing: 5, submission: 4 },
+        };
 
+        const req = beltRequirements[belt];
         const objectives: BeltObjectiveStatus[] = [];
 
-        if (belt === 'white') {
+        objectives.push({
+          label: 'Défenses',
+          description: `Maîtriser toutes les défenses (${defenseMastered}/${defenseTechniques.length})`,
+          completed: defenseTechniques.length > 0 && defenseMastered === defenseTechniques.length,
+          filter: { tab: 'techniques', category: 'defense' },
+        });
+
+        objectives.push({
+          label: req.guard === 1 ? 'Système de garde' : 'Systèmes de garde',
+          description: `${req.guard} système${req.guard > 1 ? 's' : ''} de garde validé${req.guard > 1 ? 's' : ''} (${validatedGuard}/${req.guard})`,
+          completed: validatedGuard >= req.guard,
+          filter: { tab: 'systems' },
+        });
+
+        objectives.push({
+          label: req.passing === 1 ? 'Système de passage' : 'Systèmes de passage',
+          description: `${req.passing} système${req.passing > 1 ? 's' : ''} de passage validé${req.passing > 1 ? 's' : ''} (${validatedPassing}/${req.passing})`,
+          completed: validatedPassing >= req.passing,
+          filter: { tab: 'systems' },
+        });
+
+        if (req.submission > 0) {
           objectives.push({
-            label: 'Défenses',
-            description: `Maîtriser toutes les défenses (${defenseMastered}/${defenseTechniques.length})`,
-            completed: defenseTechniques.length > 0 && defenseMastered === defenseTechniques.length,
-          });
-          objectives.push({
-            label: 'Système de garde',
-            description: `1 système de garde validé (${validatedGuard}/1)`,
-            completed: validatedGuard >= 1,
-          });
-          objectives.push({
-            label: 'Système de passage',
-            description: `1 système de passage validé (${validatedPassing}/1)`,
-            completed: validatedPassing >= 1,
-          });
-        } else if (belt === 'blue') {
-          objectives.push({
-            label: 'Défenses',
-            description: `Maîtriser toutes les défenses (${defenseMastered}/${defenseTechniques.length})`,
-            completed: defenseTechniques.length > 0 && defenseMastered === defenseTechniques.length,
-          });
-          objectives.push({
-            label: 'Systèmes de garde',
-            description: `2 systèmes de garde validés (${validatedGuard}/2)`,
-            completed: validatedGuard >= 2,
-          });
-          objectives.push({
-            label: 'Systèmes de passage',
-            description: `2 systèmes de passage validés (${validatedPassing}/2)`,
-            completed: validatedPassing >= 2,
-          });
-          objectives.push({
-            label: 'Système de soumission',
-            description: `1 système de soumission validé (${validatedSubmission}/1)`,
-            completed: validatedSubmission >= 1,
-          });
-        } else if (belt === 'purple') {
-          objectives.push({
-            label: 'Défenses',
-            description: `Maîtriser toutes les défenses (${defenseMastered}/${defenseTechniques.length})`,
-            completed: defenseTechniques.length > 0 && defenseMastered === defenseTechniques.length,
-          });
-          objectives.push({
-            label: 'Systèmes de garde',
-            description: `3 systèmes de garde validés (${validatedGuard}/3)`,
-            completed: validatedGuard >= 3,
-          });
-          objectives.push({
-            label: 'Systèmes de passage',
-            description: `3 systèmes de passage validés (${validatedPassing}/3)`,
-            completed: validatedPassing >= 3,
-          });
-          objectives.push({
-            label: 'Systèmes de soumission',
-            description: `2 systèmes de soumission validés (${validatedSubmission}/2)`,
-            completed: validatedSubmission >= 2,
-          });
-        } else if (belt === 'brown') {
-          objectives.push({
-            label: 'Défenses',
-            description: `Maîtriser toutes les défenses (${defenseMastered}/${defenseTechniques.length})`,
-            completed: defenseTechniques.length > 0 && defenseMastered === defenseTechniques.length,
-          });
-          objectives.push({
-            label: 'Systèmes de garde',
-            description: `4 systèmes de garde validés (${validatedGuard}/4)`,
-            completed: validatedGuard >= 4,
-          });
-          objectives.push({
-            label: 'Systèmes de passage',
-            description: `4 systèmes de passage validés (${validatedPassing}/4)`,
-            completed: validatedPassing >= 4,
-          });
-          objectives.push({
-            label: 'Systèmes de soumission',
-            description: `3 systèmes de soumission validés (${validatedSubmission}/3)`,
-            completed: validatedSubmission >= 3,
-          });
-        } else {
-          // black
-          objectives.push({
-            label: 'Défenses',
-            description: `Maîtriser toutes les défenses (${defenseMastered}/${defenseTechniques.length})`,
-            completed: defenseTechniques.length > 0 && defenseMastered === defenseTechniques.length,
-          });
-          objectives.push({
-            label: 'Systèmes de garde',
-            description: `5 systèmes de garde validés (${validatedGuard}/5)`,
-            completed: validatedGuard >= 5,
-          });
-          objectives.push({
-            label: 'Systèmes de passage',
-            description: `5 systèmes de passage validés (${validatedPassing}/5)`,
-            completed: validatedPassing >= 5,
-          });
-          objectives.push({
-            label: 'Systèmes de soumission',
-            description: `4 systèmes de soumission validés (${validatedSubmission}/4)`,
-            completed: validatedSubmission >= 4,
+            label: req.submission === 1 ? 'Système de soumission' : 'Systèmes de soumission',
+            description: `${req.submission} système${req.submission > 1 ? 's' : ''} de soumission validé${req.submission > 1 ? 's' : ''} (${validatedSubmission}/${req.submission})`,
+            completed: validatedSubmission >= req.submission,
+            filter: { tab: 'systems' },
           });
         }
 
