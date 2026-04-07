@@ -15,9 +15,13 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./SRC/*"]
+      "@/*": ["SRC/*"]
     }
   },
-  "include": ["SRC", "vite-env.d.ts"]
+  "include": [
+    "SRC/**/*",
+    "vite-env.d.ts"
+  ]
 }

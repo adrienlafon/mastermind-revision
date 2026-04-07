@@ -1,0 +1,123 @@
+import { useState, useMemo } from 'react'
+import { useAppStore, type AppState } from '../lib/store'
+import { CATEGORY_CONFIG, MASTERY_CONFIG, type Category, type MasteryLevel, type TechniqueWithProgress } from '../lib/types'
+import { TechniqueCard } from '../components/TechniqueCard'
+
+interface Props {
+  onOpenDetail: (id: number) => void
+}
+
+const CATEGORIES: Category[] = ['defense', 'guard', 'passing', 'submission']
+
+export function ProgressionScreen({ onOpenDetail }: Props) {
+  const [category, setCategory] = useState<Category | 'all'>('all')
+  const [masteryFilter, setMasteryFilter] = useState<MasteryLevel | 'all'>('all')
+  const userTechniques = useAppStore((s: AppState) => s.userTechniques)
+  const getProgressionTechniques = useAppStore((s: AppState) => s.getProgressionTechniques)
+
+  const techniques = useMemo(() => {
+    let all: TechniqueWithProgress[] = getProgressionTechniques()
+    if (category !== 'all') {
+      all = all.filter(t => t.category === category)
+    }
+    if (masteryFilter !== 'all') {
+      all = all.filter(t => t.masteryLevel === masteryFilter)
+    }
+    return all
+  }, [category, masteryFilter, userTechniques])
+
+  const totalInProgress = getProgressionTechniques().length
+
+  return (
+    <div className="max-w-lg mx-auto px-4 py-6 space-y-4">
+      <div>
+        <h1 className="text-xl font-bold">Ma Progression</h1>
+        <p className="text-sm text-muted-foreground">{totalInProgress} technique{totalInProgress !== 1 ? 's' : ''} en apprentissage</p>
+      </div>
+
+      {/* Category tabs */}
+      <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4">
+        <button
+          onClick={() => setCategory('all')}
+          className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border-2 transition-colors ${
+            category === 'all'
+              ? 'bg-primary text-primary-foreground border-primary'
+              : 'bg-card border-border hover:border-primary/50'
+          }`}
+        >
+          Tous
+        </button>
+        {CATEGORIES.map(cat => {
+          const config = CATEGORY_CONFIG[cat]
+          return (
+            <button
+              key={cat}
+              onClick={() => setCategory(cat)}
+              className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border-2 transition-colors ${
+                category === cat
+                  ? 'text-white border-transparent'
+                  : 'bg-card border-border hover:border-primary/50'
+              }`}
+              style={category === cat ? { backgroundColor: config.color } : undefined}
+            >
+              {config.icon} {config.label}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Mastery filter */}
+      <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4">
+        <button
+          onClick={() => setMasteryFilter('all')}
+          className={`shrink-0 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors ${
+            masteryFilter === 'all'
+              ? 'bg-foreground/10 border-foreground/20 text-foreground'
+              : 'bg-card border-border text-muted-foreground'
+          }`}
+        >
+          Tous niveaux
+        </button>
+        {(['in_progress', 'sparring_ok', 'competition_ok'] as MasteryLevel[]).map(level => {
+          const config = MASTERY_CONFIG[level]
+          return (
+            <button
+              key={level}
+              onClick={() => setMasteryFilter(masteryFilter === level ? 'all' : level)}
+              className={`shrink-0 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors ${
+                masteryFilter === level
+                  ? 'text-white border-transparent'
+                  : 'bg-card border-border text-muted-foreground'
+              }`}
+              style={masteryFilter === level ? { backgroundColor: config.color } : undefined}
+            >
+              {config.shortLabel} {config.label}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Technique list */}
+      <div className="space-y-3">
+        {techniques.map(t => (
+          <TechniqueCard
+            key={t.id}
+            name={t.name}
+            category={t.category}
+            masteryLevel={t.masteryLevel}
+            onClick={() => onOpenDetail(t.id)}
+          />
+        ))}
+      </div>
+
+      {techniques.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">Aucune technique en progression.</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Commencez par explorer la bibliothèque et changer le niveau de maîtrise d'une technique.
+          </p>
+        </div>
+      )}
+    </div>
+  )
+}
