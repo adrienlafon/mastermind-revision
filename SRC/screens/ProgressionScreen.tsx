@@ -3,6 +3,7 @@ import { useAppStore, type AppState } from '../lib/store'
 import { CATEGORY_CONFIG, MASTERY_CONFIG, type Category, type MasteryLevel, type TechniqueWithProgress } from '../lib/types'
 import { TechniqueCard } from '../components/TechniqueCard'
 import { AddTechniqueDialog } from '../components/AddTechniqueDialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog'
 import { Button } from '../components/ui/button'
 import { Plus } from '@phosphor-icons/react'
 
@@ -17,7 +18,14 @@ export function ProgressionScreen({ onOpenDetail }: Props) {
   const [masteryFilter, setMasteryFilter] = useState<MasteryLevel | 'all'>('all')
   const userTechniques = useAppStore((s: AppState) => s.userTechniques)
   const getProgressionTechniques = useAppStore((s: AppState) => s.getProgressionTechniques)
+  const getAllTechniquesWithProgress = useAppStore((s: AppState) => s.getAllTechniquesWithProgress)
+  const updateMastery = useAppStore((s: AppState) => s.updateMastery)
   const [addOpen, setAddOpen] = useState(false)
+  const [addFromLibOpen, setAddFromLibOpen] = useState(false)
+
+  const notLearnedTechniques = useMemo(() => {
+    return getAllTechniquesWithProgress().filter(t => t.masteryLevel === 'not_learned')
+  }, [userTechniques])
 
   const techniques = useMemo(() => {
     let all: TechniqueWithProgress[] = getProgressionTechniques()
@@ -39,9 +47,14 @@ export function ProgressionScreen({ onOpenDetail }: Props) {
           <h1 className="text-xl font-bold">Ma Progression</h1>
           <p className="text-sm text-muted-foreground">{totalInProgress} technique{totalInProgress !== 1 ? 's' : ''} en apprentissage</p>
         </div>
-        <Button size="sm" onClick={() => setAddOpen(true)}>
-          <Plus weight="bold" className="mr-1" size={16} /> Nouvelle
-        </Button>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={() => setAddOpen(true)}>
+            <Plus weight="bold" className="mr-1" size={16} /> Nouvelle
+          </Button>
+          <Button size="sm" onClick={() => setAddFromLibOpen(true)}>
+            <Plus weight="bold" className="mr-1" size={16} /> Ajouter
+          </Button>
+        </div>
       </div>
 
       {/* Category tabs */}
@@ -129,6 +142,42 @@ export function ProgressionScreen({ onOpenDetail }: Props) {
       )}
 
       <AddTechniqueDialog open={addOpen} onOpenChange={setAddOpen} />
+
+      {/* Add from library dialog */}
+      <Dialog open={addFromLibOpen} onOpenChange={setAddFromLibOpen}>
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Ajouter depuis la bibliothèque</DialogTitle>
+          </DialogHeader>
+          {notLearnedTechniques.length === 0 ? (
+            <div className="text-center py-6">
+              <p className="text-muted-foreground">Toutes les techniques sont déjà en progression.</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {notLearnedTechniques.map(t => {
+                const catConfig = CATEGORY_CONFIG[t.category]
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => { updateMastery(t.id, 'in_progress'); setAddFromLibOpen(false) }}
+                    className="w-full flex items-center gap-3 p-3 rounded-lg border-2 border-border hover:border-primary/50 text-left transition-colors"
+                  >
+                    <span
+                      className="text-xs px-1.5 py-0.5 rounded text-white shrink-0"
+                      style={{ backgroundColor: catConfig.color }}
+                    >
+                      {catConfig.icon}
+                    </span>
+                    <p className="text-sm font-medium truncate flex-1">{t.name}</p>
+                    <Plus size={18} className="text-primary shrink-0" />
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
