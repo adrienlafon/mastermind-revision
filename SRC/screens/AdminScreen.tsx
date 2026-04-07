@@ -1,5 +1,6 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useAppStore, type AppState } from '../lib/store'
+import { useAuthStore } from '../lib/auth-store'
 import { TECHNIQUES } from '../lib/techniques'
 import { CATEGORY_CONFIG, MASTERY_CONFIG, BELT_CONFIG, type Category, type Technique, type MasteryLevel, type Belt } from '../lib/types'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog'
@@ -69,10 +70,11 @@ function TechniquesTab({ search, setSearch, categoryFilter, setCategoryFilter }:
   setCategoryFilter: (c: Category | 'all') => void
 }) {
   const getAllTechniques = useAppStore((s: AppState) => s.getAllTechniques)
-  const customTechniques = useAppStore((s: AppState) => s.customTechniques)
-  const addCustomTechnique = useAppStore((s: AppState) => s.addCustomTechnique)
-  const editTechnique = useAppStore((s: AppState) => s.editTechnique)
-  const deleteTechnique = useAppStore((s: AppState) => s.deleteTechnique)
+  const globalSharedTechniques = useAppStore((s: AppState) => s.globalSharedTechniques)
+  const adminAddTechnique = useAppStore((s: AppState) => s.adminAddTechnique)
+  const adminEditTechnique = useAppStore((s: AppState) => s.adminEditTechnique)
+  const adminDeleteTechnique = useAppStore((s: AppState) => s.adminDeleteTechnique)
+  const syncGlobalTechniques = useAuthStore(s => s.syncGlobalTechniques)
 
   const [editDialog, setEditDialog] = useState<{ open: boolean; technique: Technique | null }>({ open: false, technique: null })
   const [addOpen, setAddOpen] = useState(false)
@@ -82,7 +84,8 @@ function TechniquesTab({ search, setSearch, categoryFilter, setCategoryFilter }:
   const [formVideoUrl, setFormVideoUrl] = useState('')
 
   const allTechniques = getAllTechniques()
-  const customIds = new Set(customTechniques.map(t => t.id))
+  const sharedIds = new Set(globalSharedTechniques.map(t => t.id))
+  const baseIds = new Set(TECHNIQUES.map(t => t.id))
 
   const filtered = useMemo(() => {
     let result = allTechniques
@@ -114,23 +117,25 @@ function TechniquesTab({ search, setSearch, categoryFilter, setCategoryFilter }:
 
   const handleSaveEdit = () => {
     if (!editDialog.technique || !formName.trim()) return
-    editTechnique(editDialog.technique.id, {
+    adminEditTechnique(editDialog.technique.id, {
       name: formName.trim(),
       category: formCategory,
       description: formDescription.trim(),
       videoUrl: formVideoUrl.trim() || undefined,
     })
+    syncGlobalTechniques()
     setEditDialog({ open: false, technique: null })
   }
 
   const handleAdd = () => {
     if (!formName.trim()) return
-    addCustomTechnique({
+    adminAddTechnique({
       name: formName.trim(),
       category: formCategory,
       description: formDescription.trim(),
       videoUrl: formVideoUrl.trim() || undefined,
     })
+    syncGlobalTechniques()
     setAddOpen(false)
   }
 
@@ -207,7 +212,10 @@ function TechniquesTab({ search, setSearch, categoryFilter, setCategoryFilter }:
             <tbody>
               {filtered.map(t => {
                 const catConfig = CATEGORY_CONFIG[t.category]
-                const isCustom = customIds.has(t.id)
+                const isShared = sharedIds.has(t.id)
+                const isBase = baseIds.has(t.id)
+                const typeLabel = isBase ? 'Base' : isShared ? 'Partagée' : 'Perso'
+                const typeClass = isBase ? 'bg-muted text-muted-foreground' : isShared ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'
                 return (
                   <tr key={t.id} onClick={() => openEdit(t)} className="border-b border-border/50 hover:bg-muted/20 transition-colors cursor-pointer">
                     <td className="px-4 py-2.5 text-muted-foreground text-xs font-mono">{t.id}</td>
@@ -228,8 +236,8 @@ function TechniquesTab({ search, setSearch, categoryFilter, setCategoryFilter }:
                       )}
                     </td>
                     <td className="px-4 py-2.5">
-                      <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${isCustom ? 'bg-blue-500/20 text-blue-400' : 'bg-muted text-muted-foreground'}`}>
-                        {isCustom ? 'Custom' : 'Base'}
+                      <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${typeClass}`}>
+                        {typeLabel}
                       </span>
                     </td>
                     <td className="px-4 py-2.5 text-right">
@@ -240,15 +248,14 @@ function TechniquesTab({ search, setSearch, categoryFilter, setCategoryFilter }:
                         >
                           <PencilSimple size={16} />
                         </button>
-                        {isCustom && (
+                        {isShared && (
                           <button
-                            onClick={(e) => { e.stopPropagation(); if (confirm(`Supprimer "${t.name}" ?`)) deleteTechnique(t.id) }}
+                            onClick={(e) => { e.stopPropagation(); if (confirm(`Supprimer "${t.name}" ?`)) { adminDeleteTechnique(t.id); syncGlobalTechniques() } }}
                             className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                           >
                             <Trash size={16} />
                           </button>
                         )}
-
                       </div>
                     </td>
                   </tr>

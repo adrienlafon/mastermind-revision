@@ -15,12 +15,14 @@ export interface AppState {
   belt: Belt;
   // User technique progress
   userTechniques: Record<number, UserTechnique>;
-  // Custom techniques added by the user
+  // Custom techniques added by the user (personal)
   customTechniques: Technique[];
-  // Overrides for base techniques
-  baseOverrides: Record<number, Partial<Omit<Technique, 'id'>>>;
   // Technique systems
   systems: TechniqueSystem[];
+
+  // Global techniques (shared by admin, not persisted locally)
+  globalBaseOverrides: Record<number, Partial<Omit<Technique, 'id'>>>;
+  globalSharedTechniques: Technique[];
   
   // Actions
   setBelt: (belt: Belt) => void;
@@ -31,6 +33,11 @@ export interface AppState {
   addCustomTechnique: (technique: Omit<Technique, 'id'>) => number;
   editTechnique: (id: number, updates: Partial<Omit<Technique, 'id'>>) => void;
   deleteTechnique: (id: number) => void;
+  // Admin actions (global techniques)
+  adminEditTechnique: (id: number, updates: Partial<Omit<Technique, 'id'>>) => void;
+  adminAddTechnique: (technique: Omit<Technique, 'id'>) => number;
+  adminDeleteTechnique: (id: number) => void;
+  setGlobalTechniques: (data: { baseOverrides: Record<number, Partial<Omit<Technique, 'id'>>>; sharedTechniques: Technique[] }) => void;
   createSystem: (name: string, category: SystemCategory) => number;
   deleteSystem: (systemId: number) => void;
   addTechniqueToSystem: (systemId: number, techniqueId: number) => void;
@@ -61,8 +68,9 @@ export const useAppStore = create<AppState>()(
       belt: 'white' as Belt,
       userTechniques: {},
       customTechniques: [],
-      baseOverrides: {},
       systems: [],
+      globalBaseOverrides: {},
+      globalSharedTechniques: [],
 
       setBelt: (belt) => set({ belt }),
 
@@ -130,7 +138,7 @@ export const useAppStore = create<AppState>()(
 
       addCustomTechnique: (technique) => {
         const state = get();
-        const allTechniques = [...TECHNIQUES, ...state.customTechniques];
+        const allTechniques = [...TECHNIQUES, ...state.globalSharedTechniques, ...state.customTechniques];
         const maxId = allTechniques.reduce((max, t) => Math.max(max, t.id), 0);
         const newId = maxId + 1;
         set({ customTechniques: [...state.customTechniques, { ...technique, id: newId }] });
@@ -146,14 +154,8 @@ export const useAppStore = create<AppState>()(
               t.id === id ? { ...t, ...updates } : t
             ),
           });
-        } else {
-          set({
-            baseOverrides: {
-              ...state.baseOverrides,
-              [id]: { ...state.baseOverrides[id], ...updates },
-            },
-          });
         }
+        // For base/shared techniques, user can't edit — use admin actions
       },
 
       deleteTechnique: (id) => {
@@ -167,6 +169,49 @@ export const useAppStore = create<AppState>()(
             techniqueIds: s.techniqueIds.filter(tid => tid !== id),
           })),
         }));
+      },
+
+      // ─── Admin actions (global techniques) ─────────────────────
+      adminEditTechnique: (id, updates) => {
+        const state = get();
+        const isShared = state.globalSharedTechniques.some(t => t.id === id);
+        if (isShared) {
+          set({
+            globalSharedTechniques: state.globalSharedTechniques.map(t =>
+              t.id === id ? { ...t, ...updates } : t
+            ),
+          });
+        } else {
+          // It's a base technique — apply an override
+          set({
+            globalBaseOverrides: {
+              ...state.globalBaseOverrides,
+              [id]: { ...state.globalBaseOverrides[id], ...updates },
+            },
+          });
+        }
+      },
+
+      adminAddTechnique: (technique) => {
+        const state = get();
+        const allTechniques = [...TECHNIQUES, ...state.globalSharedTechniques, ...state.customTechniques];
+        const maxId = allTechniques.reduce((max, t) => Math.max(max, t.id), 0);
+        const newId = maxId + 1;
+        set({ globalSharedTechniques: [...state.globalSharedTechniques, { ...technique, id: newId }] });
+        return newId;
+      },
+
+      adminDeleteTechnique: (id) => {
+        set((state) => ({
+          globalSharedTechniques: state.globalSharedTechniques.filter(t => t.id !== id),
+        }));
+      },
+
+      setGlobalTechniques: (data) => {
+        set({
+          globalBaseOverrides: data.baseOverrides ?? {},
+          globalSharedTechniques: data.sharedTechniques ?? [],
+        });
       },
 
       createSystem: (name, category) => {
@@ -212,10 +257,10 @@ export const useAppStore = create<AppState>()(
       getAllTechniques: () => {
         const state = get();
         const base = TECHNIQUES.map(t => {
-          const override = state.baseOverrides[t.id];
+          const override = state.globalBaseOverrides[t.id];
           return override ? { ...t, ...override } : t;
         });
-        return [...base, ...state.customTechniques];
+        return [...base, ...state.globalSharedTechniques, ...state.customTechniques];
       },
 
       getTechniqueWithProgress: (techniqueId) => {
@@ -342,6 +387,12 @@ export const useAppStore = create<AppState>()(
     {
       name: 'bjj-tracker-storage',
       storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        belt: state.belt,
+        userTechniques: state.userTechniques,
+        customTechniques: state.customTechniques,
+        systems: state.systems,
+      }),
     }
   )
 );

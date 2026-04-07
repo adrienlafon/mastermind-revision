@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { type AuthUser, getMe, login as apiLogin, register as apiRegister, logout as apiLogout, loadStateFromCloud, saveStateToCloud } from './auth'
+import { type AuthUser, getMe, login as apiLogin, register as apiRegister, logout as apiLogout, loadStateFromCloud, saveStateToCloud, loadGlobalTechniques, saveGlobalTechniques } from './auth'
 import { useAppStore } from './store'
 
 interface AuthState {
@@ -12,6 +12,7 @@ interface AuthState {
   register: (login: string, password: string) => Promise<void>
   logout: () => void
   syncToCloud: () => Promise<void>
+  syncGlobalTechniques: () => Promise<void>
   loadFromCloud: () => Promise<void>
 }
 
@@ -25,7 +26,6 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     const user = await getMe()
     set({ user, loading: false })
     if (user) {
-      // Load state from cloud on init
       await get().loadFromCloud()
     }
   },
@@ -67,11 +67,26 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       userTechniques: appState.userTechniques,
       customTechniques: appState.customTechniques,
       systems: appState.systems,
-      baseOverrides: appState.baseOverrides,
+    })
+  },
+
+  syncGlobalTechniques: async () => {
+    const appState = useAppStore.getState()
+    await saveGlobalTechniques({
+      baseOverrides: appState.globalBaseOverrides,
+      sharedTechniques: appState.globalSharedTechniques,
     })
   },
 
   loadFromCloud: async () => {
+    // Load global techniques (shared by admin)
+    const global = await loadGlobalTechniques()
+    useAppStore.getState().setGlobalTechniques({
+      baseOverrides: global.baseOverrides ?? {},
+      sharedTechniques: global.sharedTechniques ?? [],
+    })
+
+    // Load user-specific state
     const state = await loadStateFromCloud()
     if (state) {
       useAppStore.setState({
@@ -79,7 +94,6 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         userTechniques: state.userTechniques ?? {},
         customTechniques: state.customTechniques ?? [],
         systems: state.systems ?? [],
-        baseOverrides: state.baseOverrides ?? {},
       })
     }
   },

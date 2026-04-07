@@ -77,10 +77,14 @@ export function isLoggedIn(): boolean {
 // ─── State sync ──────────────────────────────────────────────
 
 export async function loadStateFromCloud(): Promise<any | null> {
-  const res = await fetch(`${API_BASE}/state`, { headers: getHeaders() })
-  if (!res.ok) return null
-  const data = await res.json()
-  return data.state
+  try {
+    const res = await fetch(`${API_BASE}/state`, { headers: getHeaders() })
+    if (!res.ok) return null
+    const data = await res.json()
+    return data.state
+  } catch {
+    return null
+  }
 }
 
 export async function saveStateToCloud(state: {
@@ -88,13 +92,42 @@ export async function saveStateToCloud(state: {
   userTechniques: Record<string, any>
   customTechniques: any[]
   systems: any[]
-  baseOverrides: Record<string, any>
 }): Promise<boolean> {
   try {
     const res = await fetch(`${API_BASE}/state`, {
       method: 'PUT',
       headers: getHeaders(),
       body: JSON.stringify(state),
+    })
+    return res.ok
+  } catch {
+    return false
+  }
+}
+
+// ─── Global techniques (shared by admin) ─────────────────────
+
+export interface GlobalTechniquesData {
+  baseOverrides: Record<string, any>
+  sharedTechniques: any[]
+}
+
+export async function loadGlobalTechniques(): Promise<GlobalTechniquesData> {
+  try {
+    const res = await fetch(`${API_BASE}/techniques`, { headers: getHeaders() })
+    if (!res.ok) return { baseOverrides: {}, sharedTechniques: [] }
+    return await res.json()
+  } catch {
+    return { baseOverrides: {}, sharedTechniques: [] }
+  }
+}
+
+export async function saveGlobalTechniques(data: GlobalTechniquesData): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_BASE}/techniques`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify(data),
     })
     return res.ok
   } catch {

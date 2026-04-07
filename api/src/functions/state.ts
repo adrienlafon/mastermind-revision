@@ -33,7 +33,6 @@ app.http('stateGet', {
             userTechniques: doc.userTechniques,
             customTechniques: doc.customTechniques,
             systems: doc.systems,
-            baseOverrides: doc.baseOverrides,
           }
         }
       }
@@ -59,7 +58,6 @@ app.http('statePut', {
         userTechniques: Record<string, any>
         customTechniques: any[]
         systems: any[]
-        baseOverrides: Record<string, any>
       }
 
       const db = await getDatabase()
@@ -72,7 +70,6 @@ app.http('statePut', {
         userTechniques: body.userTechniques ?? {},
         customTechniques: body.customTechniques ?? [],
         systems: body.systems ?? [],
-        baseOverrides: body.baseOverrides ?? {},
         updatedAt: new Date().toISOString()
       }
 
