@@ -1,6 +1,6 @@
-import { House, Target, ChartLineUp, Books } from '@phosphor-icons/react'
+import { House, Target, ChartLineUp, Books, GearSix } from '@phosphor-icons/react'
 
-export type Screen = 'dashboard' | 'gameplan' | 'progression' | 'library'
+export type Screen = 'dashboard' | 'gameplan' | 'progression' | 'library' | 'admin'
 
 interface BottomNavProps {
   active: Screen
@@ -12,6 +12,7 @@ const NAV_ITEMS: { key: Screen; label: string; Icon: typeof House }[] = [
   { key: 'gameplan', label: 'Game Plan', Icon: Target },
   { key: 'progression', label: 'Progression', Icon: ChartLineUp },
   { key: 'library', label: 'Bibliothèque', Icon: Books },
+  { key: 'admin', label: 'Admin', Icon: GearSix },
 ]
 
 export function BottomNav({ active, onChange }: BottomNavProps) {

@@ -27,6 +27,8 @@ export interface AppState {
   toggleGamePlan: (techniqueId: number) => void;
   reorderGamePlan: (fromIndex: number, toIndex: number) => void;
   addCustomTechnique: (technique: Omit<Technique, 'id'>) => number;
+  editTechnique: (id: number, updates: Partial<Omit<Technique, 'id'>>) => void;
+  deleteTechnique: (id: number) => void;
   createSystem: (name: string, category: SystemCategory) => number;
   deleteSystem: (systemId: number) => void;
   addTechniqueToSystem: (systemId: number, techniqueId: number) => void;
@@ -130,6 +132,27 @@ export const useAppStore = create<AppState>()(
         const newId = maxId + 1;
         set({ customTechniques: [...state.customTechniques, { ...technique, id: newId }] });
         return newId;
+      },
+
+      editTechnique: (id, updates) => {
+        set((state) => ({
+          customTechniques: state.customTechniques.map(t =>
+            t.id === id ? { ...t, ...updates } : t
+          ),
+        }));
+      },
+
+      deleteTechnique: (id) => {
+        set((state) => ({
+          customTechniques: state.customTechniques.filter(t => t.id !== id),
+          userTechniques: Object.fromEntries(
+            Object.entries(state.userTechniques).filter(([key]) => parseInt(key) !== id)
+          ),
+          systems: state.systems.map(s => ({
+            ...s,
+            techniqueIds: s.techniqueIds.filter(tid => tid !== id),
+          })),
+        }));
       },
 
       createSystem: (name, category) => {

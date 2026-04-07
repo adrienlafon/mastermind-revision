@@ -5,6 +5,7 @@ import { DashboardScreen } from '@/screens/DashboardScreen'
 import { GamePlanScreen } from '@/screens/GamePlanScreen'
 import { ProgressionScreen } from '@/screens/ProgressionScreen'
 import { LibraryScreen } from '@/screens/LibraryScreen'
+import { AdminScreen } from '@/screens/AdminScreen'
 import { Toaster } from '@/components/ui/sonner'
 import type { ProgressionFilter } from '@/lib/types'
 
@@ -39,6 +40,9 @@ function App() {
       )}
       {screen === 'library' && (
         <LibraryScreen onOpenDetail={setDetailId} />
+      )}
+      {screen === 'admin' && (
+        <AdminScreen />
       )}
 
       <TechniqueDetailDialog
