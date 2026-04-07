@@ -17,6 +17,8 @@ export interface AppState {
   userTechniques: Record<number, UserTechnique>;
   // Custom techniques added by the user
   customTechniques: Technique[];
+  // Overrides for base techniques
+  baseOverrides: Record<number, Partial<Omit<Technique, 'id'>>>;
   // Technique systems
   systems: TechniqueSystem[];
   
@@ -59,6 +61,7 @@ export const useAppStore = create<AppState>()(
       belt: 'white' as Belt,
       userTechniques: {},
       customTechniques: [],
+      baseOverrides: {},
       systems: [],
 
       setBelt: (belt) => set({ belt }),
@@ -135,11 +138,22 @@ export const useAppStore = create<AppState>()(
       },
 
       editTechnique: (id, updates) => {
-        set((state) => ({
-          customTechniques: state.customTechniques.map(t =>
-            t.id === id ? { ...t, ...updates } : t
-          ),
-        }));
+        const state = get();
+        const isCustom = state.customTechniques.some(t => t.id === id);
+        if (isCustom) {
+          set({
+            customTechniques: state.customTechniques.map(t =>
+              t.id === id ? { ...t, ...updates } : t
+            ),
+          });
+        } else {
+          set({
+            baseOverrides: {
+              ...state.baseOverrides,
+              [id]: { ...state.baseOverrides[id], ...updates },
+            },
+          });
+        }
       },
 
       deleteTechnique: (id) => {
@@ -196,11 +210,16 @@ export const useAppStore = create<AppState>()(
       },
 
       getAllTechniques: () => {
-        return [...TECHNIQUES, ...get().customTechniques];
+        const state = get();
+        const base = TECHNIQUES.map(t => {
+          const override = state.baseOverrides[t.id];
+          return override ? { ...t, ...override } : t;
+        });
+        return [...base, ...state.customTechniques];
       },
 
       getTechniqueWithProgress: (techniqueId) => {
-        const allTechniques = [...TECHNIQUES, ...get().customTechniques];
+        const allTechniques = get().getAllTechniques();
         const technique = allTechniques.find(t => t.id === techniqueId);
         if (!technique) return undefined;
 
@@ -217,7 +236,7 @@ export const useAppStore = create<AppState>()(
 
       getAllTechniquesWithProgress: () => {
         const state = get();
-        const allTechniques = [...TECHNIQUES, ...state.customTechniques];
+        const allTechniques = get().getAllTechniques();
         return allTechniques.map(technique => {
           const userTechnique = state.userTechniques[technique.id] || getInitialUserTechnique(technique.id);
           return {

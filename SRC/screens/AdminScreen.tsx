@@ -197,9 +197,9 @@ function TechniquesTab({ search, setSearch, categoryFilter, setCategoryFilter }:
                 const catConfig = CATEGORY_CONFIG[t.category]
                 const isCustom = customIds.has(t.id)
                 return (
-                  <tr key={t.id} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
+                  <tr key={t.id} onClick={() => openEdit(t)} className="border-b border-border/50 hover:bg-muted/20 transition-colors cursor-pointer">
                     <td className="px-4 py-2.5 text-muted-foreground text-xs font-mono">{t.id}</td>
-                    <td className="px-4 py-2.5 font-medium">{t.name}</td>
+                    <td className="px-4 py-2.5 font-medium text-primary">{t.name}</td>
                     <td className="px-4 py-2.5">
                       <span
                         className="text-[10px] font-medium px-1.5 py-0.5 rounded text-white"
@@ -210,7 +210,7 @@ function TechniquesTab({ search, setSearch, categoryFilter, setCategoryFilter }:
                     </td>
                     <td className="px-4 py-2.5 text-xs">
                       {t.videoUrl ? (
-                        <a href={t.videoUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">🔗 Lien</a>
+                        <a href={t.videoUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="text-primary hover:underline">🔗 Lien</a>
                       ) : (
                         <span className="text-muted-foreground">—</span>
                       )}
@@ -222,25 +222,21 @@ function TechniquesTab({ search, setSearch, categoryFilter, setCategoryFilter }:
                     </td>
                     <td className="px-4 py-2.5 text-right">
                       <div className="flex items-center justify-end gap-1">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); openEdit(t) }}
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                        >
+                          <PencilSimple size={16} />
+                        </button>
                         {isCustom && (
-                          <>
-                            <button
-                              onClick={() => openEdit(t)}
-                              className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-                            >
-                              <PencilSimple size={16} />
-                            </button>
-                            <button
-                              onClick={() => { if (confirm(`Supprimer "${t.name}" ?`)) deleteTechnique(t.id) }}
-                              className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-                            >
-                              <Trash size={16} />
-                            </button>
-                          </>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); if (confirm(`Supprimer "${t.name}" ?`)) deleteTechnique(t.id) }}
+                            className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                          >
+                            <Trash size={16} />
+                          </button>
                         )}
-                        {!isCustom && (
-                          <span className="text-[10px] text-muted-foreground">Lecture seule</span>
-                        )}
+
                       </div>
                     </td>
                   </tr>
