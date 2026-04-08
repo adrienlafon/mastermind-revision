@@ -1,7 +1,7 @@
-import { House, Target, ChartLineUp, Books, GearSix } from '@phosphor-icons/react'
+import { House, Target, ChartLineUp, Books, GearSix, TreeStructure } from '@phosphor-icons/react'
 import { useAuthStore } from '@/lib/auth-store'
 
-export type Screen = 'dashboard' | 'gameplan' | 'progression' | 'library' | 'admin'
+export type Screen = 'dashboard' | 'gameplan' | 'gameplan-tree' | 'progression' | 'library' | 'admin'
 
 interface BottomNavProps {
   active: Screen
@@ -11,8 +11,9 @@ interface BottomNavProps {
 const NAV_ITEMS: { key: Screen; label: string; Icon: typeof House; adminOnly?: boolean }[] = [
   { key: 'dashboard', label: 'Accueil', Icon: House },
   { key: 'gameplan', label: 'Game Plan', Icon: Target },
+  { key: 'gameplan-tree', label: 'Arbre', Icon: TreeStructure },
   { key: 'progression', label: 'Progression', Icon: ChartLineUp },
-  { key: 'library', label: 'Bibliothèque', Icon: Books },
+  { key: 'library', label: 'Biblio', Icon: Books },
   { key: 'admin', label: 'Admin', Icon: GearSix, adminOnly: true },
 ]
 

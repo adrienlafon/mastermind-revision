@@ -84,3 +84,26 @@ export type ProgressionFilter =
   | { tab: 'techniques'; category: Category }
   | { tab: 'systems' }
   | null;
+
+// Decision Tree types for Game Plan Tree
+export interface DecisionTreeNode {
+  id: string;
+  label: string;                    // Position or technique name
+  description?: string;             // What to do
+  techniqueId?: number;             // Link to a technique from the library
+  children: DecisionTreeBranch[];   // Branches (opponent reactions)
+}
+
+export interface DecisionTreeBranch {
+  condition: string;                // "Si l'adversaire ..." or reaction label
+  nodeId: string;                   // Target node id
+}
+
+export interface DecisionTree {
+  id: string;
+  name: string;
+  rootNodeId: string;
+  nodes: Record<string, DecisionTreeNode>;
+  createdAt: string;
+  updatedAt: string;
+}

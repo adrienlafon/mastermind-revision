@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { Technique, UserTechnique, MasteryLevel, TechniqueWithProgress, Category, Belt, TechniqueSystem, SystemCategory, ProgressionFilter } from './types';
+import { Technique, UserTechnique, MasteryLevel, TechniqueWithProgress, Category, Belt, TechniqueSystem, SystemCategory, ProgressionFilter, DecisionTree, DecisionTreeNode } from './types';
 import { TECHNIQUES } from './techniques';
 
 export interface BeltObjectiveStatus {
@@ -19,6 +19,8 @@ export interface AppState {
   customTechniques: Technique[];
   // Technique systems
   systems: TechniqueSystem[];
+  // Decision trees
+  decisionTrees: DecisionTree[];
 
   // Global techniques (shared by admin, not persisted locally)
   globalBaseOverrides: Record<number, Partial<Omit<Technique, 'id'>>>;
@@ -43,6 +45,13 @@ export interface AppState {
   addTechniqueToSystem: (systemId: number, techniqueId: number) => void;
   removeTechniqueFromSystem: (systemId: number, techniqueId: number) => void;
   validateSystem: (systemId: number) => void;
+  // Decision tree actions
+  createDecisionTree: (name: string) => string;
+  deleteDecisionTree: (treeId: string) => void;
+  updateDecisionTree: (treeId: string, updates: Partial<Omit<DecisionTree, 'id'>>) => void;
+  addTreeNode: (treeId: string, node: DecisionTreeNode, parentNodeId?: string, condition?: string) => void;
+  updateTreeNode: (treeId: string, nodeId: string, updates: Partial<Omit<DecisionTreeNode, 'id'>>) => void;
+  deleteTreeNode: (treeId: string, nodeId: string) => void;
   
   // Computed selectors
   getAllTechniques: () => Technique[];
@@ -69,6 +78,7 @@ export const useAppStore = create<AppState>()(
       userTechniques: {},
       customTechniques: [],
       systems: [],
+      decisionTrees: [],
       globalBaseOverrides: {},
       globalSharedTechniques: [],
 
@@ -251,6 +261,87 @@ export const useAppStore = create<AppState>()(
           systems: state.systems.map(s =>
             s.id === systemId ? { ...s, validated: true } : s
           ),
+        }));
+      },
+
+      createDecisionTree: (name) => {
+        const id = crypto.randomUUID();
+        const rootId = crypto.randomUUID();
+        const now = new Date().toISOString();
+        const tree: DecisionTree = {
+          id,
+          name,
+          rootNodeId: rootId,
+          nodes: {
+            [rootId]: { id: rootId, label: 'Position de départ', children: [] }
+          },
+          createdAt: now,
+          updatedAt: now,
+        };
+        set((state) => ({ decisionTrees: [...state.decisionTrees, tree] }));
+        return id;
+      },
+
+      deleteDecisionTree: (treeId) => {
+        set((state) => ({ decisionTrees: state.decisionTrees.filter(t => t.id !== treeId) }));
+      },
+
+      updateDecisionTree: (treeId, updates) => {
+        set((state) => ({
+          decisionTrees: state.decisionTrees.map(t =>
+            t.id === treeId ? { ...t, ...updates, updatedAt: new Date().toISOString() } : t
+          ),
+        }));
+      },
+
+      addTreeNode: (treeId, node, parentNodeId, condition) => {
+        set((state) => ({
+          decisionTrees: state.decisionTrees.map(t => {
+            if (t.id !== treeId) return t;
+            const nodes = { ...t.nodes, [node.id]: node };
+            if (parentNodeId && condition !== undefined) {
+              const parent = nodes[parentNodeId];
+              if (parent) {
+                nodes[parentNodeId] = {
+                  ...parent,
+                  children: [...parent.children, { condition, nodeId: node.id }],
+                };
+              }
+            }
+            return { ...t, nodes, updatedAt: new Date().toISOString() };
+          }),
+        }));
+      },
+
+      updateTreeNode: (treeId, nodeId, updates) => {
+        set((state) => ({
+          decisionTrees: state.decisionTrees.map(t => {
+            if (t.id !== treeId) return t;
+            const node = t.nodes[nodeId];
+            if (!node) return t;
+            return {
+              ...t,
+              nodes: { ...t.nodes, [nodeId]: { ...node, ...updates } },
+              updatedAt: new Date().toISOString(),
+            };
+          }),
+        }));
+      },
+
+      deleteTreeNode: (treeId, nodeId) => {
+        set((state) => ({
+          decisionTrees: state.decisionTrees.map(t => {
+            if (t.id !== treeId) return t;
+            const { [nodeId]: _, ...remainingNodes } = t.nodes;
+            // Remove branches pointing to this node
+            const cleanedNodes = Object.fromEntries(
+              Object.entries(remainingNodes).map(([id, node]) => [
+                id,
+                { ...node, children: node.children.filter(c => c.nodeId !== nodeId) },
+              ])
+            );
+            return { ...t, nodes: cleanedNodes, updatedAt: new Date().toISOString() };
+          }),
         }));
       },
 

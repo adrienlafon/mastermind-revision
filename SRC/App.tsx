@@ -3,6 +3,7 @@ import { BottomNav, type Screen } from '@/components/BottomNav'
 import { TechniqueDetailDialog } from '@/components/TechniqueDetailDialog'
 import { DashboardScreen } from '@/screens/DashboardScreen'
 import { GamePlanScreen } from '@/screens/GamePlanScreen'
+import { GamePlanTreeScreen } from '@/screens/GamePlanTreeScreen'
 import { ProgressionScreen } from '@/screens/ProgressionScreen'
 import { LibraryScreen } from '@/screens/LibraryScreen'
 import { AdminScreen } from '@/screens/AdminScreen'
@@ -70,6 +71,9 @@ function App() {
       )}
       {screen === 'gameplan' && (
         <GamePlanScreen onOpenDetail={setDetailId} onBack={() => setScreen('dashboard')} />
+      )}
+      {screen === 'gameplan-tree' && (
+        <GamePlanTreeScreen onOpenDetail={setDetailId} onBack={() => setScreen('dashboard')} />
       )}
       {screen === 'progression' && (
         <ProgressionScreen onOpenDetail={setDetailId} initialFilter={progressionFilter} onFilterConsumed={() => setProgressionFilter(null)} onBack={() => setScreen('dashboard')} />
