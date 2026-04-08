@@ -1,3 +1,17 @@
+/**
+ * GamePlanTreeScreen.tsx — Arbre de décision.
+ *
+ * Permet de créer des arbres de décision conditionnels :
+ * - Chaque nœud représente une position ou technique
+ * - Les branches représentent les réactions de l'adversaire ("Si il fait X...")
+ * - Chaque nœud peut être lié à une technique de la bibliothèque
+ * - L'arbre est affiché récursivement avec des couleurs par profondeur
+ *
+ * Trois composants :
+ * - GamePlanTreeScreen : liste des arbres + création/suppression
+ * - TreeEditor : édition d'un arbre (ajout de nœuds, branches, liens)
+ * - TreeNodeView : affichage récursif d'un nœud et ses enfants
+ */
 import { useState } from 'react'
 import { useAppStore, type AppState } from '../lib/store'
 import type { DecisionTree, DecisionTreeNode, DecisionTreeBranch } from '../lib/types'

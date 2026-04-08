@@ -1,3 +1,12 @@
+/**
+ * UserManagement.tsx — Gestion des utilisateurs (admin).
+ *
+ * Affiche la liste des comptes inscrits.
+ * Permet à l'admin de :
+ * - Voir la progression d'un utilisateur (dialog avec détail par technique)
+ * - Supprimer un compte
+ * - Réinitialiser un mot de passe
+ */
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

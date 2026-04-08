@@ -1,3 +1,15 @@
+/**
+ * TechniqueDetailDialog.tsx — Dialog de détail d'une technique.
+ *
+ * Affiche pour une technique :
+ * - Nom, catégorie, description complète
+ * - Sélecteur de niveau de maîtrise (4 niveaux)
+ * - Lien vers la vidéo Patreon
+ * - Zone de notes personnelles
+ * - Bouton pour ajouter/retirer du game plan
+ *
+ * Ce dialog est partagé entre tous les écrans (ouvert via setDetailId dans App.tsx).
+ */
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 import { Button } from './ui/button'
 import { CATEGORY_CONFIG } from '../lib/types'

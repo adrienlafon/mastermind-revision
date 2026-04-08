@@ -1,3 +1,9 @@
+/**
+ * MasterySelector.tsx — Sélecteur de niveau de maîtrise.
+ *
+ * 4 boutons horizontaux : Non appris → En cours → OK sparring → OK compétition.
+ * Utilisé dans le dialog de détail et la progression.
+ */
 import { MASTERY_CONFIG, type MasteryLevel } from '../lib/types'
 
 interface MasterySelectorProps {

@@ -1,3 +1,13 @@
+/**
+ * GamePlanScreen.tsx — Game Plan linéaire.
+ *
+ * Permet à l'utilisateur de construire un enchaînement ordonné de techniques.
+ * Fonctionnalités :
+ * - Ajouter des techniques depuis la progression ou en créer de nouvelles
+ * - Réordonner par drag & drop
+ * - Supprimer une technique du plan
+ * - Cliquer pour voir le détail
+ */
 import { useState } from 'react'
 import { useAppStore, type AppState } from '../lib/store'
 import { CATEGORY_CONFIG, MASTERY_CONFIG, type TechniqueWithProgress } from '../lib/types'

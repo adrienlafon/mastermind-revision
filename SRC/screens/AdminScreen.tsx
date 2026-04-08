@@ -1,3 +1,12 @@
+/**
+ * AdminScreen.tsx — Panneau d'administration (réservé au propriétaire).
+ *
+ * Permet à l'admin de :
+ * - Modifier les techniques de base (titre, description, vidéo)
+ * - Ajouter/supprimer des techniques partagées
+ * - Gérer les utilisateurs (voir liste, progression, supprimer, reset mdp)
+ * - Synchroniser les modifications vers le cloud
+ */
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useAppStore, type AppState } from '../lib/store'
 import { useAuthStore } from '../lib/auth-store'

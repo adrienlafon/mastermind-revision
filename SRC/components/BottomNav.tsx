@@ -1,3 +1,9 @@
+/**
+ * BottomNav.tsx — Barre de navigation inférieure (mobile-first).
+ *
+ * Onglets : Accueil, Game Plan, Arbre, Progression, Biblio, Admin (si owner).
+ * Fixée en bas de l'écran, visible sur toutes les pages.
+ */
 import { House, Target, ChartLineUp, Books, GearSix, TreeStructure } from '@phosphor-icons/react'
 import { useAuthStore } from '@/lib/auth-store'
 

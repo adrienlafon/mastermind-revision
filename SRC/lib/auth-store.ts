@@ -1,3 +1,13 @@
+/**
+ * auth-store.ts — Store Zustand pour l'authentification.
+ *
+ * Gère :
+ * - L'état de connexion (user, loading, error)
+ * - Login / Register / Logout
+ * - Chargement des données depuis le cloud au login
+ * - Synchronisation de l'état local vers le cloud
+ * - Chargement des techniques globales (partagées par l'admin)
+ */
 import { create } from 'zustand'
 import { type AuthUser, getMe, login as apiLogin, register as apiRegister, logout as apiLogout, loadStateFromCloud, saveStateToCloud, loadGlobalTechniques, saveGlobalTechniques } from './auth'
 import { useAppStore } from './store'

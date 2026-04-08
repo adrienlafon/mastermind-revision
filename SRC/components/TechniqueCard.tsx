@@ -1,3 +1,9 @@
+/**
+ * TechniqueCard.tsx — Carte compacte d'une technique.
+ *
+ * Utilisé dans les listes (progression, bibliothèque, game plan).
+ * Affiche : nom, catégorie (couleur + emoji), niveau de maîtrise.
+ */
 import { CATEGORY_CONFIG, MASTERY_CONFIG, type Category, type MasteryLevel } from '../lib/types'
 
 interface TechniqueCardProps {

@@ -1,3 +1,13 @@
+/**
+ * App.tsx — Point d'entrée principal de l'application MasterMind.
+ *
+ * Gère :
+ * - La navigation entre les écrans (dashboard, game plan, arbre, progression, bibliothèque, admin)
+ * - L'authentification (affiche LoginScreen si non connecté)
+ * - La synchronisation automatique des données vers le cloud (debounce 2s)
+ * - Le thème sombre/clair
+ * - Le dialog de détail d'une technique (partagé entre tous les écrans)
+ */
 import { useState, useEffect } from 'react'
 import { BottomNav, type Screen } from '@/components/BottomNav'
 import { TechniqueDetailDialog } from '@/components/TechniqueDetailDialog'

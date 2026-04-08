@@ -1,3 +1,17 @@
+/**
+ * store.ts — Store Zustand principal de l'application.
+ *
+ * Gère tout l'état local :
+ * - Niveau de ceinture de l'utilisateur
+ * - Progression sur chaque technique (maîtrise, notes, game plan)
+ * - Techniques personnalisées ajoutées par l'utilisateur
+ * - Systèmes de techniques (groupes créés par l'élève)
+ * - Arbres de décision (game plan arbre)
+ * - Techniques globales partagées par l'admin
+ *
+ * Persistance : localStorage via zustand/persist
+ * Sync cloud : déclenchée par auth-store.ts après chaque modification
+ */
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { Technique, UserTechnique, MasteryLevel, TechniqueWithProgress, Category, Belt, TechniqueSystem, SystemCategory, ProgressionFilter, DecisionTree, DecisionTreeNode } from './types';

@@ -1,3 +1,13 @@
+/**
+ * DashboardScreen.tsx — Écran d'accueil de l'application.
+ *
+ * Affiche :
+ * - Le niveau de ceinture de l'utilisateur
+ * - Les objectifs de ceinture (checklist de progression)
+ * - Les statistiques globales de progression
+ * - Un accès rapide vers Game Plan, Progression, Bibliothèque
+ * - Le bouton de déconnexion
+ */
 import { useAppStore, type AppState } from '../lib/store'
 import { useAuthStore } from '../lib/auth-store'
 import { BELT_CONFIG, type Belt, type ProgressionFilter } from '../lib/types'

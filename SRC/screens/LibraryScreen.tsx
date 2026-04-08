@@ -1,3 +1,12 @@
+/**
+ * LibraryScreen.tsx — Bibliothèque de toutes les techniques.
+ *
+ * Affiche la liste complète des 70 techniques organisées par catégorie.
+ * Permet de :
+ * - Parcourir les techniques par catégorie
+ * - Rechercher une technique
+ * - Cliquer pour voir le détail (description, vidéo, notes)
+ */
 import { useState, useMemo } from 'react'
 import { CATEGORY_CONFIG, type Category } from '../lib/types'
 import { useAppStore, type AppState } from '../lib/store'

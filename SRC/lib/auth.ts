@@ -1,3 +1,18 @@
+/**
+ * auth.ts — Fonctions d'appel API pour l'authentification et la synchronisation.
+ *
+ * Endpoints utilisés :
+ * - POST /api/auth/register  → Créer un compte
+ * - POST /api/auth/login     → Se connecter
+ * - GET  /api/auth/me        → Vérifier le token JWT
+ * - GET/PUT /api/state       → Charger/sauvegarder l'état utilisateur
+ * - GET/PUT /api/techniques  → Techniques globales (admin)
+ * - GET /api/users           → Liste des utilisateurs (admin)
+ * - DELETE /api/users/:id    → Supprimer un utilisateur (admin)
+ *
+ * Le token JWT est stocké dans localStorage sous 'auth-token'
+ * et envoyé dans les headers Authorization et x-auth-token.
+ */
 const API_BASE = '/api'
 
 function getToken(): string | null {

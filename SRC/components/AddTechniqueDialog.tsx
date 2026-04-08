@@ -1,3 +1,10 @@
+/**
+ * AddTechniqueDialog.tsx — Dialog pour ajouter une technique personnalisée.
+ *
+ * Permet à l'utilisateur de créer sa propre technique avec :
+ * - Nom, catégorie, description
+ * La technique est ajoutée au store local (pas aux techniques de base).
+ */
 import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 import { Button } from './ui/button'

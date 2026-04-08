@@ -1,3 +1,14 @@
+/**
+ * ProgressionScreen.tsx — Écran de suivi de progression.
+ *
+ * Affiche toutes les techniques avec leur niveau de maîtrise.
+ * Permet de :
+ * - Filtrer par catégorie (Défense, Garde, Passage, Soumission)
+ * - Filtrer par niveau de maîtrise
+ * - Rechercher par nom
+ * - Changer le niveau de maîtrise d'une technique
+ * - Gérer les systèmes (groupes de techniques)
+ */
 import { useState, useMemo, useEffect } from 'react'
 import { useAppStore, type AppState } from '../lib/store'
 import { CATEGORY_CONFIG, MASTERY_CONFIG, SYSTEM_CATEGORY_CONFIG, type Category, type MasteryLevel, type TechniqueWithProgress, type SystemCategory, type ProgressionFilter } from '../lib/types'

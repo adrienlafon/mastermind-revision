@@ -1,3 +1,15 @@
+/**
+ * index.css — Styles globaux de l'application.
+ *
+ * Utilise le système de couleurs OKLCh pour des couleurs perceptuellement uniformes.
+ * Deux thèmes : clair (:root) et sombre ([data-theme="dark"]).
+ * Les variables CSS sont utilisées par Tailwind via @theme.
+ *
+ * Variables principales :
+ * --background / --foreground : couleurs de base
+ * --card / --primary / --accent : composants UI
+ * --status-weak / --status-progress / --status-mastered : niveaux de maîtrise
+ */
 @import 'tailwindcss';
 @import "tw-animate-css";
 

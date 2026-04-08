@@ -1,3 +1,12 @@
+/**
+ * LoginScreen.tsx — Écran de connexion / inscription.
+ *
+ * Formulaire double mode :
+ * - Connexion : login + mot de passe
+ * - Inscription : login + mot de passe (le premier inscrit devient admin)
+ *
+ * Appelle l'API /api/auth/login ou /api/auth/register.
+ */
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
