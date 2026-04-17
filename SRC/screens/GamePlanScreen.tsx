@@ -23,7 +23,7 @@ interface Props {
 
 export function GamePlanScreen({ onOpenDetail, onBack }: Props) {
   const getGamePlanTechniques = useAppStore((s: AppState) => s.getGamePlanTechniques)
-  const getProgressionTechniques = useAppStore((s: AppState) => s.getProgressionTechniques)
+  const getAllTechniquesWithProgress = useAppStore((s: AppState) => s.getAllTechniquesWithProgress)
   const toggleGamePlan = useAppStore((s: AppState) => s.toggleGamePlan)
   const reorderGamePlan = useAppStore((s: AppState) => s.reorderGamePlan)
   const userTechniques = useAppStore((s: AppState) => s.userTechniques)
@@ -33,8 +33,8 @@ export function GamePlanScreen({ onOpenDetail, onBack }: Props) {
   const [dragIndex, setDragIndex] = useState<number | null>(null)
 
   const gamePlanTechniques: TechniqueWithProgress[] = getGamePlanTechniques()
-  const allProgression: TechniqueWithProgress[] = getProgressionTechniques()
-  const progressionTechniques = allProgression.filter(t => !t.inGamePlan)
+  const allTechniques: TechniqueWithProgress[] = getAllTechniquesWithProgress()
+  const availableTechniques = allTechniques.filter(t => !t.inGamePlan)
 
   const handleDragStart = (index: number) => setDragIndex(index)
   const handleDragOver = (e: React.DragEvent, index: number) => {
@@ -75,10 +75,10 @@ export function GamePlanScreen({ onOpenDetail, onBack }: Props) {
           <div className="text-4xl mb-4">🎯</div>
           <p className="text-muted-foreground font-medium">Aucune technique dans votre game plan.</p>
           <p className="text-sm text-muted-foreground mt-1">
-            Ajoutez des techniques depuis votre progression.
+            Ajoutez des techniques depuis la bibliothèque.
           </p>
           <Button className="mt-4" onClick={() => setAddDialogOpen(true)}>
-            <Plus weight="bold" className="mr-1" /> Ajouter depuis ma progression
+            <Plus weight="bold" className="mr-1" /> Ajouter une technique
           </Button>
         </div>
       ) : (
@@ -134,20 +134,17 @@ export function GamePlanScreen({ onOpenDetail, onBack }: Props) {
       <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
         <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Ajouter depuis ma progression</DialogTitle>
+            <DialogTitle>Ajouter une technique</DialogTitle>
           </DialogHeader>
-          {progressionTechniques.length === 0 ? (
+          {availableTechniques.length === 0 ? (
             <div className="text-center py-6">
               <p className="text-muted-foreground">
-                Aucune technique disponible.
-              </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Changez le niveau de maîtrise d'une technique dans la bibliothèque pour la voir ici.
+                Toutes les techniques sont déjà dans votre game plan.
               </p>
             </div>
           ) : (
             <div className="space-y-2">
-              {progressionTechniques.map(t => {
+              {availableTechniques.map(t => {
                 const catConfig = CATEGORY_CONFIG[t.category]
                 const masteryConfig = MASTERY_CONFIG[t.masteryLevel]
                 return (
