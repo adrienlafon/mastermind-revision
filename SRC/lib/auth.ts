@@ -107,6 +107,7 @@ export async function saveStateToCloud(state: {
   userTechniques: Record<string, any>
   customTechniques: any[]
   systems: any[]
+  decisionTrees: any[]
 }): Promise<boolean> {
   try {
     const res = await fetch(`${API_BASE}/state`, {

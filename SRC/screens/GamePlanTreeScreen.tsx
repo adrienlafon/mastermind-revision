@@ -250,24 +250,26 @@ function TreeEditor({ tree, onBack, onOpenDetail }: { tree: DecisionTree; onBack
 
       {/* Tree visualization — visual flowchart */}
       {rootNode && (
-        <div className="flex flex-col items-center">
-          <NodeBox
-            tree={tree}
-            nodeId={tree.rootNodeId}
-            depth={0}
-            expandedNodes={expandedNodes}
-            onToggleExpand={toggleExpand}
-            onAddBranch={setAddBranchNodeId}
-            onDelete={handleDeleteNode}
-            onLink={setLinkDialogNodeId}
-            onOpenDetail={onOpenDetail}
-            onBranchDragStart={handleBranchDragStart}
-            onBranchDragOver={handleBranchDragOver}
-            onBranchDragEnd={handleBranchDragEnd}
-            dragState={dragState}
-            techniques={techniques}
-            updateTreeNode={(nodeId, updates) => updateTreeNode(tree.id, nodeId, updates)}
-          />
+        <div className="w-full overflow-x-auto pb-4">
+          <div className="flex min-w-max justify-center px-4">
+            <NodeBox
+              tree={tree}
+              nodeId={tree.rootNodeId}
+              depth={0}
+              expandedNodes={expandedNodes}
+              onToggleExpand={toggleExpand}
+              onAddBranch={setAddBranchNodeId}
+              onDelete={handleDeleteNode}
+              onLink={setLinkDialogNodeId}
+              onOpenDetail={onOpenDetail}
+              onBranchDragStart={handleBranchDragStart}
+              onBranchDragOver={handleBranchDragOver}
+              onBranchDragEnd={handleBranchDragEnd}
+              dragState={dragState}
+              techniques={techniques}
+              updateTreeNode={(nodeId, updates) => updateTreeNode(tree.id, nodeId, updates)}
+            />
+          </div>
         </div>
       )}
 
@@ -391,10 +393,10 @@ function NodeBox({
   const isExpanded = expandedNodes.has(nodeId)
 
   return (
-    <div className="flex flex-col items-center w-full">
+    <div className="flex flex-col items-center flex-none">
       {/* ── The box ── */}
       <div
-        className="relative w-full max-w-md rounded-2xl border-2 bg-card shadow-sm transition-all hover:shadow-md"
+        className="relative w-80 max-w-[calc(100vw-2rem)] rounded-2xl border-2 bg-card shadow-sm transition-all hover:shadow-md"
         style={{ borderColor: depthColor }}
       >
         {/* Color bar on top */}
@@ -512,54 +514,56 @@ function NodeBox({
 
       {/* ── Branches (children) ── */}
       {hasChildren && isExpanded && (
-        <div className="flex flex-col items-center w-full mt-0">
-          {node.children.map((branch, i) => {
-            const isDragging = dragState?.parentId === nodeId && dragState.dragIdx === i
-            return (
-              <div key={branch.nodeId} className="flex flex-col items-center w-full">
-                {/* Vertical connector arrow */}
-                <div className="flex flex-col items-center py-1">
+        <div className="flex flex-col items-center mt-0">
+          <div className="w-0.5 h-4 bg-muted-foreground/30" />
+          <div className="relative flex items-start justify-center gap-4">
+            {node.children.length > 1 && (
+              <div className="absolute left-40 right-40 top-0 h-0.5 bg-muted-foreground/30" />
+            )}
+            {node.children.map((branch, i) => {
+              const isDragging = dragState?.parentId === nodeId && dragState.dragIdx === i
+              return (
+                <div key={branch.nodeId} className="relative flex flex-col items-center flex-none">
                   <div className="w-0.5 h-4 bg-muted-foreground/30" />
-                  {/* Draggable condition pill */}
                   <div
                     draggable
                     onDragStart={() => onBranchDragStart(nodeId, i)}
                     onDragOver={(e) => onBranchDragOver(e, nodeId, i)}
                     onDragEnd={onBranchDragEnd}
-                    className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium cursor-grab active:cursor-grabbing transition-all select-none ${
+                    className={`max-w-72 flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium cursor-grab active:cursor-grabbing transition-all select-none ${
                       isDragging
                         ? 'opacity-50 scale-95 bg-primary/20 text-primary'
                         : 'bg-muted text-muted-foreground hover:bg-muted/80'
                     }`}
                   >
                     <DotsSixVertical size={12} weight="bold" className="shrink-0 opacity-50" />
-                    <span>Si : {branch.condition}</span>
+                    <span className="truncate">Si : {branch.condition}</span>
                   </div>
                   <div className="w-0.5 h-4 bg-muted-foreground/30" />
                   <ArrowDown size={14} className="text-muted-foreground/50 -mt-1.5" weight="bold" />
-                </div>
 
-                {/* Child node (recursive) */}
-                <NodeBox
-                  tree={tree}
-                  nodeId={branch.nodeId}
-                  depth={depth + 1}
-                  expandedNodes={expandedNodes}
-                  onToggleExpand={onToggleExpand}
-                  onAddBranch={onAddBranch}
-                  onDelete={onDelete}
-                  onLink={onLink}
-                  onOpenDetail={onOpenDetail}
-                  onBranchDragStart={onBranchDragStart}
-                  onBranchDragOver={onBranchDragOver}
-                  onBranchDragEnd={onBranchDragEnd}
-                  dragState={dragState}
-                  techniques={techniques}
-                  updateTreeNode={updateTreeNode}
-                />
-              </div>
-            )
-          })}
+                  {/* Child node (recursive) */}
+                  <NodeBox
+                    tree={tree}
+                    nodeId={branch.nodeId}
+                    depth={depth + 1}
+                    expandedNodes={expandedNodes}
+                    onToggleExpand={onToggleExpand}
+                    onAddBranch={onAddBranch}
+                    onDelete={onDelete}
+                    onLink={onLink}
+                    onOpenDetail={onOpenDetail}
+                    onBranchDragStart={onBranchDragStart}
+                    onBranchDragOver={onBranchDragOver}
+                    onBranchDragEnd={onBranchDragEnd}
+                    dragState={dragState}
+                    techniques={techniques}
+                    updateTreeNode={updateTreeNode}
+                  />
+                </div>
+              )
+            })}
+          </div>
         </div>
       )}
     </div>

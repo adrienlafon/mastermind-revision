@@ -497,6 +497,7 @@ export const useAppStore = create<AppState>()(
         userTechniques: state.userTechniques,
         customTechniques: state.customTechniques,
         systems: state.systems,
+        decisionTrees: state.decisionTrees,
       }),
     }
   )

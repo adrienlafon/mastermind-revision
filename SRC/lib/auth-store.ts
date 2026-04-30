@@ -77,6 +77,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       userTechniques: appState.userTechniques,
       customTechniques: appState.customTechniques,
       systems: appState.systems,
+      decisionTrees: appState.decisionTrees,
     })
   },
 
@@ -104,6 +105,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         userTechniques: state.userTechniques ?? {},
         customTechniques: state.customTechniques ?? [],
         systems: state.systems ?? [],
+        decisionTrees: state.decisionTrees ?? [],
       })
     }
   },

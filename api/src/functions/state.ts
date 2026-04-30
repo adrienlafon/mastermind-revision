@@ -33,6 +33,7 @@ app.http('stateGet', {
             userTechniques: doc.userTechniques,
             customTechniques: doc.customTechniques,
             systems: doc.systems,
+            decisionTrees: doc.decisionTrees,
           }
         }
       }
@@ -58,6 +59,7 @@ app.http('statePut', {
         userTechniques: Record<string, any>
         customTechniques: any[]
         systems: any[]
+        decisionTrees: any[]
       }
 
       const db = await getDatabase()
@@ -70,6 +72,7 @@ app.http('statePut', {
         userTechniques: body.userTechniques ?? {},
         customTechniques: body.customTechniques ?? [],
         systems: body.systems ?? [],
+        decisionTrees: body.decisionTrees ?? [],
         updatedAt: new Date().toISOString()
       }
 
